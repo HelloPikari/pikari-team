@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    name: Build Release Assets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production
+        run: npm run build
+
+      - name: Create distribution ZIP
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          SLUG="pikari-team"
+
+          echo "Building release for version: $VERSION"
+
+          mkdir -p /tmp/dist/$SLUG
+
+          echo "Creating production distribution..."
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='src' \
+            --exclude='tests' \
+            --exclude='vendor' \
+            --exclude='.*' \
+            --exclude='*.log' \
+            --exclude='*.lock' \
+            --exclude='composer.*' \
+            --exclude='package*' \
+            --exclude='webpack.*' \
+            --exclude='*.md' \
+            --exclude='bin' \
+            --exclude='_playground' \
+            --exclude='.husky' \
+            --exclude='*.sh' \
+            --exclude='phpcs.xml' \
+            --exclude='*.config.*' \
+            . /tmp/dist/$SLUG/
+
+          if [ ! -d "/tmp/dist/$SLUG/build" ]; then
+            echo "Build directory missing from distribution"
+            exit 1
+          fi
+
+          cd /tmp/dist
+          zip -r "${SLUG}-v${VERSION}.zip" $SLUG
+          mv "${SLUG}-v${VERSION}.zip" $GITHUB_WORKSPACE/
+
+          echo "Created distribution ZIP: ${SLUG}-v${VERSION}.zip"
+
+          cd $GITHUB_WORKSPACE
+          sha256sum "${SLUG}-v${VERSION}.zip" > "${SLUG}-v${VERSION}-checksums.txt"
+          md5sum "${SLUG}-v${VERSION}.zip" >> "${SLUG}-v${VERSION}-checksums.txt"
+
+          echo "ZIP_FILE=${SLUG}-v${VERSION}.zip" >> $GITHUB_ENV
+          echo "CHECKSUMS_FILE=${SLUG}-v${VERSION}-checksums.txt" >> $GITHUB_ENV
+
+      - name: Verify distribution
+        run: |
+          echo "Distribution contents:"
+          unzip -l "${{ env.ZIP_FILE }}" | head -20
+
+          echo -e "\nChecksums:"
+          cat "${{ env.CHECKSUMS_FILE }}"
+
+          echo -e "\nZIP size:"
+          ls -lh "${{ env.ZIP_FILE }}"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.ZIP_FILE }}
+            ${{ env.CHECKSUMS_FILE }}
+          tag_name: ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
