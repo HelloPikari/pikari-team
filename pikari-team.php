@@ -72,6 +72,12 @@ function pikari_team_init() {
     new \Pikari\Team\QR_Code();
     new \Pikari\Team\PWA();
     new \Pikari\Team\Shortcode();
+
+    // Register the card embed block.
+    $block_dir = PIKARI_TEAM_DIR . 'build/blocks/card';
+    if ( file_exists( $block_dir ) ) {
+        register_block_type( $block_dir );
+    }
 }
 add_action( 'init', 'pikari_team_init' );
 

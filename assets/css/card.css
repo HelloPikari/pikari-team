@@ -1,0 +1,175 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+body.pikari-team-card-page {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+		Ubuntu, Cantarell, sans-serif;
+	background: #f5f5f5;
+	color: #333;
+	line-height: 1.5;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+}
+.pikari-team-card {
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 20px rgb(0 0 0 / 10%);
+	max-width: 400px;
+	width: 100%;
+	overflow: hidden;
+}
+.pikari-team-card__header {
+	padding: 2rem 1.5rem 1.5rem;
+	text-align: center;
+	color: #fff;
+}
+.pikari-team-card__headshot {
+	width: 120px;
+	height: 120px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid rgb(255 255 255 / 80%);
+	margin-bottom: 1rem;
+}
+.pikari-team-card__name {
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin-bottom: 0.25rem;
+}
+.pikari-team-card__designation {
+	font-size: 0.875rem;
+	opacity: 0.9;
+}
+.pikari-team-card__title {
+	font-size: 1rem;
+	opacity: 0.9;
+	margin-bottom: 0.25rem;
+}
+.pikari-team-card__company {
+	font-size: 0.875rem;
+	opacity: 0.8;
+}
+.pikari-team-card__contact {
+	padding: 1rem 1.5rem;
+}
+.pikari-team-card__link {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid #eee;
+	color: inherit;
+	text-decoration: none;
+}
+.pikari-team-card__link:last-child {
+	border-bottom: none;
+}
+.pikari-team-card__link:hover,
+.pikari-team-card__link:focus {
+	color: var(--pikari-brand-color, #0073aa);
+}
+.pikari-team-card__label {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #999;
+	flex-shrink: 0;
+	margin-right: 1rem;
+}
+.pikari-team-card__value {
+	font-size: 0.9375rem;
+	text-align: right;
+	word-break: break-all;
+}
+.pikari-team-card__social {
+	display: flex;
+	gap: 0.75rem;
+	justify-content: center;
+	padding: 1rem 1.5rem;
+	border-top: 1px solid #eee;
+}
+.pikari-team-card__social-link {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	background: #f5f5f5;
+	border-radius: 6px;
+	color: #333;
+	text-decoration: none;
+	font-size: 0.875rem;
+}
+.pikari-team-card__social-link:hover,
+.pikari-team-card__social-link:focus {
+	background: var(--pikari-brand-color, #0073aa);
+	color: #fff;
+}
+.pikari-team-card__qr {
+	padding: 1.5rem;
+	text-align: center;
+}
+.pikari-team-card__qr svg {
+	max-width: 200px;
+	height: auto;
+}
+.pikari-team-card__actions {
+	padding: 0 1.5rem 1.5rem;
+}
+.pikari-team-card__save-btn {
+	display: block;
+	width: 100%;
+	padding: 0.875rem;
+	background: var(--pikari-brand-color, #0073aa);
+	color: #fff;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 1rem;
+}
+.pikari-team-card__save-btn:hover,
+.pikari-team-card__save-btn:focus {
+	opacity: 0.9;
+}
+
+/* Embed card styles */
+.pikari-team-card-embed {
+	display: flex;
+	gap: 1rem;
+	padding: 1rem;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	max-width: 400px;
+}
+.pikari-team-card-embed__headshot {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+.pikari-team-card-embed__info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+.pikari-team-card-embed__name {
+	font-size: 1rem;
+}
+.pikari-team-card-embed__title,
+.pikari-team-card-embed__company {
+	font-size: 0.875rem;
+	color: #666;
+}
+.pikari-team-card-embed__phone,
+.pikari-team-card-embed__email {
+	font-size: 0.875rem;
+	color: var(--pikari-brand-color, #0073aa);
+	text-decoration: none;
+}
