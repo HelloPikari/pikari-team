@@ -56,6 +56,17 @@ if ( class_exists( '\Pikari\Team\QR_Code' ) ) {
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="<?php echo esc_attr( $brand_color ); ?>">
+    <?php
+    $logo_id = $settings['company_logo'] ?? 0;
+    if ( $logo_id ) {
+        $logo_192 = wp_get_attachment_image_url( $logo_id, 'medium' );
+        if ( $logo_192 ) :
+            ?>
+    <link rel="apple-touch-icon" href="<?php echo esc_url( $logo_192 ); ?>">
+            <?php
+        endif;
+    }
+    ?>
     <link rel="manifest" href="/<?php echo esc_attr( $url_base ); ?>/<?php echo esc_attr( $slug ); ?>/manifest.json">
 
     <style>

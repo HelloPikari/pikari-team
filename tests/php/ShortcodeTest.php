@@ -34,6 +34,8 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_resolves_slug_to_post_id(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
         Functions\expect( 'get_posts' )
             ->once()
             ->with( \Mockery::on( function ( $args ) {
@@ -50,6 +52,8 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_uses_id_attribute_directly(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
         Functions\expect( 'get_posts' )->never();
 
         $shortcode = new Shortcode();
