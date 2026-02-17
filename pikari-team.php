@@ -55,3 +55,38 @@ spl_autoload_register(
         }
     }
 );
+
+/**
+ * Initialize the plugin.
+ */
+function pikari_team_init() {
+    load_plugin_textdomain( 'pikari-team', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+    new \Pikari\Team\Settings();
+    new \Pikari\Team\Post_Type();
+    new \Pikari\Team\Meta_Box();
+    new \Pikari\Team\Block_Bindings();
+    new \Pikari\Team\Template();
+    new \Pikari\Team\Template_Parts();
+    new \Pikari\Team\VCard();
+    new \Pikari\Team\QR_Code();
+    new \Pikari\Team\PWA();
+    new \Pikari\Team\Shortcode();
+}
+add_action( 'init', 'pikari_team_init' );
+
+/**
+ * Flush rewrite rules on activation.
+ */
+function pikari_team_activate() {
+    flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'pikari_team_activate' );
+
+/**
+ * Flush rewrite rules on deactivation.
+ */
+function pikari_team_deactivate() {
+    flush_rewrite_rules();
+}
+register_deactivation_hook( __FILE__, 'pikari_team_deactivate' );
