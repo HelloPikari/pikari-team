@@ -127,7 +127,7 @@ class Validation {
 
         $meta = [];
         foreach ( self::REQUIRED_FIELDS as $field ) {
-            $meta[ $field ] = get_post_meta( $post_id, $field, true );
+            $meta[ $field ] = (string) get_post_meta( $post_id, $field, true );
         }
 
         $missing = self::get_missing_required_fields( $meta );
