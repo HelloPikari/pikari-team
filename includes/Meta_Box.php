@@ -12,6 +12,15 @@ class Meta_Box {
     private const NONCE_ACTION = 'pikari_team_meta_save';
     private const NONCE_FIELD  = 'pikari_team_meta_nonce';
 
+    private const INPUT_TYPES = [
+        'pikari_team_email'    => 'email',
+        'pikari_team_phone'    => 'tel',
+        'pikari_team_cell'     => 'tel',
+        'pikari_team_website'  => 'url',
+        'pikari_team_linkedin' => 'url',
+        'pikari_team_twitter'  => 'url',
+    ];
+
     private const FIELD_GROUPS = [
         'Personal' => [
             'pikari_team_first_name'  => 'First Name',
@@ -70,12 +79,17 @@ class Meta_Box {
             echo '</strong></legend>';
 
             foreach ( $fields as $key => $label ) {
-                $value = get_post_meta( $post->ID, $key, true );
+                $value      = get_post_meta( $post->ID, $key, true );
+                $input_type = self::INPUT_TYPES[ $key ] ?? 'text';
+                $required   = Validation::is_required( $key );
                 echo '<p>';
                 echo '<label for="' . esc_attr( $key ) . '">';
                 echo esc_html( $label );
+                if ( $required ) {
+                    echo ' <span class="pikari-team-required" aria-label="' . esc_attr__( 'required', 'pikari-team' ) . '">*</span>';
+                }
                 echo '</label><br>';
-                echo '<input type="text" id="' . esc_attr( $key ) . '" ';
+                echo '<input type="' . esc_attr( $input_type ) . '" id="' . esc_attr( $key ) . '" ';
                 echo 'name="' . esc_attr( $key ) . '" ';
                 echo 'value="' . esc_attr( $value ) . '" class="widefat">';
                 echo '</p>';
@@ -106,5 +120,7 @@ class Meta_Box {
                 update_post_meta( $post_id, $key, $value );
             }
         }
+
+        Validation::maybe_add_admin_notice( $post_id );
     }
 }
