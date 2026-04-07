@@ -78,6 +78,9 @@ function pikari_team_init() {
     new \Pikari\Team\PWA();
     new \Pikari\Team\Shortcode();
 
+    // Register default card rendering hooks.
+    \Pikari\Team\Card_Renderer::register_defaults();
+
     // Register the card embed block on init (register_block_type requires init).
     add_action(
         'init',
