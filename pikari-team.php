@@ -36,6 +36,9 @@ define( 'PIKARI_TEAM_DIR', plugin_dir_path( __FILE__ ) );
  */
 define( 'PIKARI_TEAM_URL', plugin_dir_url( __FILE__ ) );
 
+// Composer autoloader (loads third-party libraries such as chillerlan/php-qrcode).
+require_once PIKARI_TEAM_DIR . 'vendor/autoload.php';
+
 // Autoloader for plugin classes.
 spl_autoload_register(
     function ( $class ) {
@@ -61,6 +64,8 @@ spl_autoload_register(
  */
 function pikari_team_init() {
     load_plugin_textdomain( 'pikari-team', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+    require_once PIKARI_TEAM_DIR . 'includes/template-tag-functions.php';
 
     new \Pikari\Team\Settings();
     new \Pikari\Team\Post_Type();
