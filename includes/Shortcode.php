@@ -49,15 +49,6 @@ class Shortcode {
             return '';
         }
 
-        $template = PIKARI_TEAM_DIR . 'templates/card-embed.php';
-
-        if ( ! file_exists( $template ) ) {
-            return '';
-        }
-
-        ob_start();
-        // phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Template scope isolation.
-        include $template;
-        return ob_get_clean();
+        return Card_Renderer::render( $post_id, 'shortcode' );
     }
 }
