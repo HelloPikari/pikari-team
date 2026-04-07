@@ -27,6 +27,7 @@ class Post_Type {
         'pikari_team_address_country',
         'pikari_team_linkedin',
         'pikari_team_twitter',
+        'pikari_team_card_template',
     ];
 
     public function __construct() {
@@ -85,46 +86,56 @@ class Post_Type {
             ),
         ];
 
-        register_post_type(
-            'pikari_team_member',
-            [
-                'labels'       => $labels,
-                'public'       => true,
-                'has_archive'  => false,
-                'show_in_rest' => true,
-                'supports'     => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ],
-                'menu_icon'    => 'dashicons-id-alt',
-                'template'     => [
-                    [ 'core/post-featured-image' ],
+        $args = [
+            'labels'       => $labels,
+            'public'       => true,
+            'has_archive'  => false,
+            'show_in_rest' => true,
+            'supports'     => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ],
+            'menu_icon'    => 'dashicons-id-alt',
+            'template'     => [
+                [ 'core/post-featured-image' ],
+                [
+                    'core/heading',
                     [
-                        'core/heading',
-                        [
-                            'metadata' => [
-                                'bindings' => [
-                                    'content' => [
-                                        'source' => 'pikari-team/meta',
-                                        'args'   => [ 'key' => 'pikari_team_first_name' ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'core/paragraph',
-                        [
-                            'metadata' => [
-                                'bindings' => [
-                                    'content' => [
-                                        'source' => 'pikari-team/meta',
-                                        'args'   => [ 'key' => 'pikari_team_job_title' ],
-                                    ],
+                        'metadata' => [
+                            'bindings' => [
+                                'content' => [
+                                    'source' => 'pikari-team/meta',
+                                    'args'   => [ 'key' => 'pikari_team_first_name' ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-            ]
-        );
+                [
+                    'core/paragraph',
+                    [
+                        'metadata' => [
+                            'bindings' => [
+                                'content' => [
+                                    'source' => 'pikari-team/meta',
+                                    'args'   => [ 'key' => 'pikari_team_job_title' ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        /**
+         * Filters the arguments passed to register_post_type() for the pikari_team_member CPT.
+         *
+         * Allows theme and plugin developers to modify CPT configuration — e.g. to add
+         * taxonomy support, change capabilities, or alter rewrite rules — without
+         * needing to deregister and re-register the post type.
+         *
+         * @param array $args The post type registration arguments.
+         */
+        $args = apply_filters( 'pikari_team_post_type_args', $args );
+
+        register_post_type( 'pikari_team_member', $args );
 
         $this->register_meta_fields();
     }
