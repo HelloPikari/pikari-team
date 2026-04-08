@@ -118,6 +118,50 @@ body.pikari-team-card-page {
 	max-width: 200px;
 	height: auto;
 }
+
+/* Carousel */
+.pikari-team-card__carousel {
+	position: relative;
+}
+.pikari-team-card__carousel-track {
+	display: flex;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+}
+.pikari-team-card__carousel-track::-webkit-scrollbar {
+	display: none;
+}
+.pikari-team-card__slide {
+	flex: 0 0 100%;
+	scroll-snap-align: center;
+	min-height: 200px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+}
+.pikari-team-card__carousel-dots {
+	display: flex;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.75rem 0 1.25rem;
+}
+.pikari-team-card__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	border: none;
+	background: #ccc;
+	padding: 0;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+.pikari-team-card__dot.active {
+	background: var(--pikari-brand-color, #0073aa);
+}
 .pikari-team-card__actions {
 	padding: 0 1.5rem 1.5rem;
 }
