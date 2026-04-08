@@ -130,6 +130,14 @@ $slug        = get_post_field( 'post_name', $post_id );
             echo file_get_contents( $sw_file );
         }
         ?>
+
+        <?php
+        $carousel_file = PIKARI_TEAM_DIR . 'assets/js/carousel.js';
+        if ( file_exists( $carousel_file ) ) {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo file_get_contents( $carousel_file );
+        }
+        ?>
     </script>
 </body>
 </html>
