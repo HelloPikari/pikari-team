@@ -17,7 +17,7 @@ class Card_RendererTest extends TestCase {
     private function mock_member_data(): void {
         Functions\expect( 'get_post_meta' )
             ->andReturnUsing(
-                function ( $id, $key, $single ) {
+                function ( $id, $key = '', $single = false ) {
                     $meta = [
                         'pikari_team_first_name' => 'Jane',
                         'pikari_team_last_name'  => 'Doe',
@@ -25,6 +25,13 @@ class Card_RendererTest extends TestCase {
                         'pikari_team_job_title'  => 'CTO',
                         'pikari_team_company'    => 'Acme',
                     ];
+                    if ( '' === $key ) {
+                        $all = [];
+                        foreach ( $meta as $k => $v ) {
+                            $all[ $k ] = [ $v ];
+                        }
+                        return $all;
+                    }
                     return $meta[ $key ] ?? '';
                 }
             );

@@ -10,13 +10,23 @@ class VCardTest extends TestCase {
 
     private function mock_post_meta( int $post_id, array $meta ): void {
         Functions\when( 'get_post_meta' )->alias(
-            function ( $id, $key, $single ) use ( $post_id, $meta ) {
+            function ( $id, $key = '', $single = false ) use ( $post_id, $meta ) {
                 if ( $id !== $post_id ) {
-                    return '';
+                    return $key ? '' : [];
+                }
+                if ( '' === $key ) {
+                    $all = [];
+                    foreach ( $meta as $k => $v ) {
+                        $all[ $k ] = [ $v ];
+                    }
+                    return $all;
                 }
                 return $meta[ $key ] ?? '';
             }
         );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'get_post_field' )->justReturn( 'john-doe' );
+        Functions\when( 'home_url' )->returnArg();
     }
 
     private function get_standard_meta(): array {

@@ -86,6 +86,8 @@ class Post_Type {
             ),
         ];
 
+        $slug = $settings['post_type_slug'] ?? 'team';
+
         $args = [
             'labels'       => $labels,
             'public'       => true,
@@ -93,6 +95,10 @@ class Post_Type {
             'show_in_rest' => true,
             'supports'     => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ],
             'menu_icon'    => 'dashicons-id-alt',
+            'rewrite'      => [
+                'slug'       => $slug,
+                'with_front' => false,
+            ],
             'template'     => [
                 [ 'core/post-featured-image' ],
                 [
@@ -141,7 +147,17 @@ class Post_Type {
     }
 
     private function register_meta_fields(): void {
-        foreach ( self::META_FIELDS as $field ) {
+        /**
+         * Filters the list of meta fields registered for team members.
+         *
+         * Allows themes and plugins to add or remove meta fields from
+         * both REST API registration and the admin meta box.
+         *
+         * @param string[] $fields Array of meta field keys (prefixed with pikari_team_).
+         */
+        $fields = apply_filters( 'pikari_team_meta_fields', self::META_FIELDS );
+
+        foreach ( $fields as $field ) {
             register_post_meta(
                 'pikari_team_member',
                 $field,
@@ -156,6 +172,6 @@ class Post_Type {
     }
 
     public static function get_meta_fields(): array {
-        return self::META_FIELDS;
+        return apply_filters( 'pikari_team_meta_fields', self::META_FIELDS );
     }
 }

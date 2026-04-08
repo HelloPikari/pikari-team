@@ -61,26 +61,29 @@ class Template_Tags {
      * @return array<string, mixed>
      */
     public static function get_member_data( int $post_id ): array {
-        // Fetch all raw meta fields.
+        $all_meta = get_post_meta( $post_id );
+
         $raw = [];
         foreach ( self::RAW_META_KEYS as $short_key ) {
-            $raw[ $short_key ] = (string) get_post_meta( $post_id, 'pikari_team_' . $short_key, true );
+            $raw[ $short_key ] = (string) ( $all_meta[ 'pikari_team_' . $short_key ][0] ?? '' );
         }
 
-        // Computed: full name.
         $full_name = trim( $raw['first_name'] . ' ' . $raw['last_name'] );
-
-        // Computed: photo URL.
         $photo_url = (string) get_the_post_thumbnail_url( $post_id, 'medium' );
 
-        // Computed: card and vCard URLs.
-        $settings = get_option( 'pikari_team_settings', [] );
-        $base     = $settings['url_base'] ?? 'card';
-        $slug     = (string) get_post_field( 'post_name', $post_id );
+        $settings = get_option( Settings::OPTION_KEY, [] );
+
+        foreach ( Settings::FIELD_DEFAULTS_MAP as $meta_key => $setting_key ) {
+            if ( '' === $raw[ $meta_key ] && ! empty( $settings[ $setting_key ] ) ) {
+                $raw[ $meta_key ] = $settings[ $setting_key ];
+            }
+        }
+
+        $base      = $settings['url_base'] ?? 'card';
+        $slug      = (string) get_post_field( 'post_name', $post_id );
         $card_url  = home_url( '/' . $base . '/' . $slug . '/' );
         $vcard_url = home_url( '/' . $base . '/' . $slug . '/download.vcf' );
 
-        // Grouped sub-arrays.
         $address = [
             'street'  => $raw['address_street'],
             'city'    => $raw['address_city'],
@@ -94,7 +97,6 @@ class Template_Tags {
             'twitter'  => $raw['twitter'],
         ];
 
-        // has_* boolean flags.
         $has_address = array_reduce(
             $address,
             fn( $carry, $val ) => $carry || $val !== '',
@@ -120,6 +122,7 @@ class Template_Tags {
                 'has_photo'      => $photo_url !== '',
                 'has_designation' => $raw['designation'] !== '',
                 'has_job_title'  => $raw['job_title'] !== '',
+                'has_email'      => $raw['email'] !== '',
                 'has_phone'      => $raw['phone'] !== '',
                 'has_cell'       => $raw['cell'] !== '',
                 'has_company'    => $raw['company'] !== '',
@@ -203,18 +206,28 @@ class Template_Tags {
      * @return array<int, array{platform: string, url: string, label: string}>
      */
     public static function get_social_links( int $post_id ): array {
+        $data = self::get_member_data( $post_id );
+        return self::get_social_links_from_data( $data );
+    }
+
+    /**
+     * Returns social links from an existing member data array.
+     *
+     * @param array<string, mixed> $data Member data array from get_member_data().
+     * @return array<int, array{platform: string, url: string, label: string}>
+     */
+    public static function get_social_links_from_data( array $data ): array {
         $links = [];
 
         foreach ( self::SOCIAL_PLATFORMS as $platform => $config ) {
-            $url = (string) get_post_meta( $post_id, $config['key'], true );
-            if ( '' === $url ) {
-                continue;
+            $short_key = $platform;
+            if ( ! empty( $data[ $short_key ] ) ) {
+                $links[] = [
+                    'platform' => $platform,
+                    'url'      => $data[ $short_key ],
+                    'label'    => $config['label'],
+                ];
             }
-            $links[] = [
-                'platform' => $platform,
-                'url'      => $url,
-                'label'    => $config['label'],
-            ];
         }
 
         return $links;

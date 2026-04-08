@@ -97,6 +97,7 @@ class Meta_BoxTest extends TestCase {
         $post     = \Mockery::mock( 'WP_Post' );
         $post->ID = 1;
         Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'wp_nonce_field' )->justReturn( '' );
 
         $meta_box = new Meta_Box();
@@ -111,6 +112,7 @@ class Meta_BoxTest extends TestCase {
         $post     = \Mockery::mock( 'WP_Post' );
         $post->ID = 1;
         Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'wp_nonce_field' )->justReturn( '' );
 
         $meta_box = new Meta_Box();

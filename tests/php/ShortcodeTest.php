@@ -35,7 +35,11 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_resolves_slug_to_post_id(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
-        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
         Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'get_post_field' )->justReturn( 'john-doe' );
@@ -56,7 +60,11 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_uses_id_attribute_directly(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
-        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
         Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'get_post_field' )->justReturn( 'test' );
@@ -76,7 +84,11 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_render_card_fires_embed_hooks(): void {
-        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
         Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'get_post_field' )->justReturn( 'test' );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );

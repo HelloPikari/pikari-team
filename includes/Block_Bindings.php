@@ -25,8 +25,8 @@ class Block_Bindings {
         );
     }
 
-    public function get_binding_value( array $args, $block, array $context ): string {
-        $post_id = $context['postId'] ?? 0;
+    public function get_binding_value( array $args, $block, string $attribute_name ): string {
+        $post_id = $block->context['postId'] ?? 0;
         $key     = $args['key'] ?? '';
 
         if ( ! $post_id || ! $key ) {

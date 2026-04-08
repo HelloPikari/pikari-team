@@ -48,9 +48,16 @@ class Template_TagsTest extends TestCase {
         $meta = array_merge( $this->default_meta(), $overrides );
 
         Functions\expect( 'get_post_meta' )->andReturnUsing(
-            function ( $id, $key, $single ) use ( $post_id, $meta ) {
+            function ( $id, $key = '', $single = false ) use ( $post_id, $meta ) {
                 if ( $id !== $post_id ) {
-                    return '';
+                    return $key ? '' : [];
+                }
+                if ( '' === $key ) {
+                    $all = [];
+                    foreach ( $meta as $k => $v ) {
+                        $all[ $k ] = [ $v ];
+                    }
+                    return $all;
                 }
                 return $meta[ $key ] ?? '';
             }

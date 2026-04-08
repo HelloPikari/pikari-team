@@ -29,6 +29,7 @@ body.pikari-team-card-page {
 	padding: 2rem 1.5rem 1.5rem;
 	text-align: center;
 	color: #fff;
+	background-color: var(--pikari-brand-color, #0073aa);
 }
 .pikari-team-card__headshot {
 	width: 120px;

@@ -9,7 +9,11 @@ namespace Pikari\Team;
 
 class Template {
 
-    private const FILE_EXTENSIONS = [ '.js', '.json', '.vcf' ];
+    /**
+     * URL suffixes that should not receive a trailing-slash redirect.
+     * Service worker registration fails if the script URL is redirected.
+     */
+    private const NO_REDIRECT_SUFFIXES = [ '/service-worker', '/manifest', '.vcf' ];
 
     public function __construct() {
         add_action( 'init', [ $this, 'register_routes' ] );
@@ -33,13 +37,13 @@ class Template {
         );
 
         add_rewrite_rule(
-            $base . '/([^/]+)/manifest\\.json/?$',
+            $base . '/([^/]+)/manifest/?$',
             'index.php?pikari_card_slug=$matches[1]&pikari_card_action=manifest',
             'top'
         );
 
         add_rewrite_rule(
-            $base . '/([^/]+)/sw\\.js/?$',
+            $base . '/([^/]+)/service-worker/?$',
             'index.php?pikari_card_slug=$matches[1]&pikari_card_action=sw',
             'top'
         );
@@ -69,8 +73,8 @@ class Template {
     public function prevent_file_redirect( string $redirect_url, string $requested_url ) {
         $path = (string) wp_parse_url( $requested_url, PHP_URL_PATH );
 
-        foreach ( self::FILE_EXTENSIONS as $ext ) {
-            if ( str_ends_with( $path, $ext ) ) {
+        foreach ( self::NO_REDIRECT_SUFFIXES as $suffix ) {
+            if ( str_ends_with( $path, $suffix ) ) {
                 return false;
             }
         }
@@ -126,19 +130,16 @@ class Template {
         $post   = $posts[0];
         $action = get_query_var( 'pikari_card_action' );
 
-        // Hand off to VCard for download action (Phase 3).
         if ( 'download' === $action ) {
             do_action( 'pikari_team_card_download', $post );
             exit;
         }
 
-        // Hand off to PWA for manifest action (Phase 4).
         if ( 'manifest' === $action ) {
             do_action( 'pikari_team_card_manifest', $post );
             exit;
         }
 
-        // Hand off to PWA for service worker action (Phase 4).
         if ( 'sw' === $action ) {
             do_action( 'pikari_team_card_sw', $post );
             exit;

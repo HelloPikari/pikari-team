@@ -123,9 +123,6 @@ class Card_Renderer {
             return;
         }
 
-        // Derive has_email from the raw value since Template_Tags doesn't expose it as a flag.
-        $has_email = isset( $data['email'] ) && '' !== $data['email'];
-
         echo '<div class="pikari-team-card__contact">';
 
         if ( $data['has_phone'] ) {
@@ -142,7 +139,7 @@ class Card_Renderer {
             echo '</a>';
         }
 
-        if ( $has_email ) {
+        if ( $data['has_email'] ) {
             echo '<a href="mailto:' . esc_attr( $data['email'] ) . '" class="pikari-team-card__contact-link">';
             echo '<span class="pikari-team-card__label">' . esc_html__( 'Email', 'pikari-team' ) . '</span>';
             echo '<span class="pikari-team-card__value">' . esc_html( $data['email'] ) . '</span>';

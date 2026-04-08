@@ -165,7 +165,73 @@ class PWATest extends TestCase {
         $js   = $pwa->generate_service_worker( $post );
 
         $this->assertStringContainsString( '/card/john-doe/', $js );
-        $this->assertStringContainsString( '/card/john-doe/manifest.json', $js );
-        $this->assertStringContainsString( 'assets/css/card.css', $js );
+        $this->assertStringContainsString( '/card/john-doe/manifest', $js );
+        $this->assertStringContainsString( 'https://example.com/photo.jpg', $js );
+    }
+
+    public function test_service_worker_does_not_include_absolute_css_url(): void {
+        $this->mock_post_meta( 1, $this->get_standard_meta() );
+        Functions\when( 'get_option' )->justReturn( [ 'url_base' => 'card' ] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+
+        $pwa  = new PWA();
+        $post = $this->get_mock_post();
+        $js   = $pwa->generate_service_worker( $post );
+
+        $this->assertStringNotContainsString( 'assets/css/card.css', $js );
+    }
+
+    public function test_service_worker_uses_network_first_for_navigations(): void {
+        $this->mock_post_meta( 1, $this->get_standard_meta() );
+        Functions\when( 'get_option' )->justReturn( [ 'url_base' => 'card' ] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+
+        $pwa  = new PWA();
+        $post = $this->get_mock_post();
+        $js   = $pwa->generate_service_worker( $post );
+
+        $this->assertStringContainsString( "event.request.mode === 'navigate'", $js );
+        $this->assertStringContainsString( 'response.clone()', $js );
+        $this->assertStringContainsString( 'cache.put(event.request, clone)', $js );
+    }
+
+    public function test_service_worker_includes_offline_navigation_fallback(): void {
+        $this->mock_post_meta( 1, $this->get_standard_meta() );
+        Functions\when( 'get_option' )->justReturn( [ 'url_base' => 'card' ] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+
+        $pwa  = new PWA();
+        $post = $this->get_mock_post();
+        $js   = $pwa->generate_service_worker( $post );
+
+        $this->assertStringContainsString( "const START_URL = '/card/john-doe/'", $js );
+        $this->assertStringContainsString( 'caches.match(START_URL)', $js );
+    }
+
+    public function test_service_worker_uses_allsettled_for_resilient_precache(): void {
+        $this->mock_post_meta( 1, $this->get_standard_meta() );
+        Functions\when( 'get_option' )->justReturn( [ 'url_base' => 'card' ] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+
+        $pwa  = new PWA();
+        $post = $this->get_mock_post();
+        $js   = $pwa->generate_service_worker( $post );
+
+        $this->assertStringContainsString( 'Promise.allSettled', $js );
+        $this->assertStringNotContainsString( 'cache.addAll', $js );
+    }
+
+    public function test_service_worker_includes_message_handler_for_client_caching(): void {
+        $this->mock_post_meta( 1, $this->get_standard_meta() );
+        Functions\when( 'get_option' )->justReturn( [ 'url_base' => 'card' ] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+
+        $pwa  = new PWA();
+        $post = $this->get_mock_post();
+        $js   = $pwa->generate_service_worker( $post );
+
+        $this->assertStringContainsString( "addEventListener('message'", $js );
+        $this->assertStringContainsString( "event.data.action === 'cache-page'", $js );
+        $this->assertStringContainsString( 'cache.add(event.data.url)', $js );
     }
 }

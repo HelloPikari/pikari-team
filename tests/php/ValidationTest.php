@@ -19,7 +19,6 @@ class ValidationTest extends TestCase {
             [
                 'pikari_team_first_name',
                 'pikari_team_last_name',
-                'pikari_team_email',
             ],
             Validation::get_required_fields()
         );
@@ -28,10 +27,10 @@ class ValidationTest extends TestCase {
     public function test_is_required_returns_true_for_required_field(): void {
         $this->assertTrue( Validation::is_required( 'pikari_team_first_name' ) );
         $this->assertTrue( Validation::is_required( 'pikari_team_last_name' ) );
-        $this->assertTrue( Validation::is_required( 'pikari_team_email' ) );
     }
 
     public function test_is_required_returns_false_for_optional_field(): void {
+        $this->assertFalse( Validation::is_required( 'pikari_team_email' ) );
         $this->assertFalse( Validation::is_required( 'pikari_team_phone' ) );
         $this->assertFalse( Validation::is_required( 'pikari_team_company' ) );
     }
@@ -71,13 +70,11 @@ class ValidationTest extends TestCase {
         $meta = [
             'pikari_team_first_name' => 'Jane',
             'pikari_team_last_name'  => '',
-            'pikari_team_email'      => '',
         ];
 
         $missing = Validation::get_missing_required_fields( $meta );
 
         $this->assertContains( 'pikari_team_last_name', $missing );
-        $this->assertContains( 'pikari_team_email', $missing );
         $this->assertNotContains( 'pikari_team_first_name', $missing );
     }
 

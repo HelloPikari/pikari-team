@@ -73,26 +73,26 @@ class TemplateTest extends TestCase {
         new Template();
     }
 
-    public function test_prevent_file_redirect_returns_false_for_sw_js(): void {
+    public function test_prevent_file_redirect_returns_false_for_service_worker(): void {
         Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
         $template = new Template();
 
         $this->assertFalse(
             $template->prevent_file_redirect(
-                'https://example.com/card/john-doe/sw.js/',
-                'https://example.com/card/john-doe/sw.js'
+                'https://example.com/card/john-doe/service-worker/',
+                'https://example.com/card/john-doe/service-worker'
             )
         );
     }
 
-    public function test_prevent_file_redirect_returns_false_for_manifest_json(): void {
+    public function test_prevent_file_redirect_returns_false_for_manifest(): void {
         Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
         $template = new Template();
 
         $this->assertFalse(
             $template->prevent_file_redirect(
-                'https://example.com/card/john-doe/manifest.json/',
-                'https://example.com/card/john-doe/manifest.json'
+                'https://example.com/card/john-doe/manifest/',
+                'https://example.com/card/john-doe/manifest'
             )
         );
     }

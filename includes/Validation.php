@@ -15,7 +15,6 @@ class Validation {
     private const REQUIRED_FIELDS = [
         'pikari_team_first_name',
         'pikari_team_last_name',
-        'pikari_team_email',
     ];
 
     /**

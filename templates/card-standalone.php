@@ -28,7 +28,7 @@ $slug        = get_post_field( 'post_name', $post_id );
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo esc_html( $data['full_name'] ); ?> — <?php echo esc_html( $data['company'] ); ?></title>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="<?php echo esc_attr( $brand_color ); ?>">
     <?php
@@ -42,12 +42,22 @@ $slug        = get_post_field( 'post_name', $post_id );
         endif;
     }
     ?>
-    <link rel="manifest" href="/<?php echo esc_attr( $url_base ); ?>/<?php echo esc_attr( $slug ); ?>/manifest.json">
+    <link rel="manifest" href="/<?php echo esc_attr( $url_base ); ?>/<?php echo esc_attr( $slug ); ?>/manifest">
 
     <style>
         <?php
-        $css_file = PIKARI_TEAM_DIR . 'assets/css/card.css';
-        if ( file_exists( $css_file ) ) {
+        /**
+         * Filters the file path to the CSS file inlined in the standalone card template.
+         *
+         * Return a file path to completely replace the plugin default CSS.
+         * Return false to skip the file and rely solely on pikari_team_card_css.
+         *
+         * @param string $css_file Absolute path to the CSS file.
+         * @param array  $data     Structured member data.
+         */
+        $css_file = apply_filters( 'pikari_team_card_css_file', PIKARI_TEAM_DIR . 'assets/css/card.css', $data );
+
+        if ( $css_file && file_exists( $css_file ) ) {
             // Local trusted CSS file — safe to inline without escaping.
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.Security.EscapeOutput.OutputNotEscaped
             echo file_get_contents( $css_file );
@@ -59,6 +69,9 @@ $slug        = get_post_field( 'post_name', $post_id );
         <?php
         /**
          * Filters additional CSS to inline in the standalone card template.
+         *
+         * Use this for small overrides. For full replacements, use
+         * pikari_team_card_css_file to point to a built CSS file instead.
          *
          * @param string $css  Additional CSS string (empty by default).
          * @param array  $data Structured member data.
@@ -85,7 +98,12 @@ $slug        = get_post_field( 'post_name', $post_id );
 <body class="pikari-team-card-page">
     <div class="pikari-team-card">
         <?php
-        $sections = [ 'header', 'contact', 'address', 'social', 'qr', 'footer' ];
+        /**
+         * Filters the list of card sections rendered in the standalone template.
+         *
+         * @param string[] $sections Section hook suffixes in render order.
+         */
+        $sections = apply_filters( 'pikari_team_card_sections', [ 'header', 'contact', 'address', 'social', 'qr', 'footer' ] );
         foreach ( $sections as $section ) {
             /**
              * Fires to render a card section in the standalone PWA template.
@@ -101,7 +119,7 @@ $slug        = get_post_field( 'post_name', $post_id );
     <script>
         <?php
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static JS path components from plugin settings.
-        echo 'var pikariSwUrl = "/' . esc_js( $url_base ) . '/' . esc_js( $slug ) . '/sw.js";';
+        echo 'var pikariSwUrl = "/' . esc_js( $url_base ) . '/' . esc_js( $slug ) . '/service-worker";';
         ?>
 
         <?php
