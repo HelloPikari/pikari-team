@@ -44,13 +44,8 @@ class Card_RendererTest extends TestCase {
     public function test_render_fires_all_section_hooks_for_single_context(): void {
         $this->mock_member_data();
 
-        // We need to track which hooks are fired.
-        // Since Brain\Monkey intercepts do_action, we use expectDone.
         Actions\expectDone( 'pikari_team_card_header' )->once();
-        Actions\expectDone( 'pikari_team_card_contact' )->once();
-        Actions\expectDone( 'pikari_team_card_address' )->once();
-        Actions\expectDone( 'pikari_team_card_social' )->once();
-        Actions\expectDone( 'pikari_team_card_qr' )->once();
+        Actions\expectDone( 'pikari_team_card_carousel' )->once();
         Actions\expectDone( 'pikari_team_card_footer' )->once();
 
         Card_Renderer::render( 1, 'single' );
@@ -90,7 +85,22 @@ class Card_RendererTest extends TestCase {
         Actions\expectAdded( 'pikari_team_card_social' )->once();
         Actions\expectAdded( 'pikari_team_card_qr' )->once();
         Actions\expectAdded( 'pikari_team_card_footer' )->once();
+        Actions\expectAdded( 'pikari_team_card_carousel' )->once();
+        Actions\expectAdded( 'pikari_team_carousel_slide_qr' )->once();
+        Actions\expectAdded( 'pikari_team_carousel_slide_contact' )->once();
 
         Card_Renderer::register_defaults();
+    }
+
+    public function test_render_carousel_fires_slide_hooks(): void {
+        $this->mock_member_data();
+
+        Actions\expectDone( 'pikari_team_carousel_slide_qr' )->once();
+        Actions\expectDone( 'pikari_team_carousel_slide_contact' )->once();
+
+        Card_Renderer::render_carousel(
+            \Pikari\Team\Template_Tags::get_member_data( 1 ),
+            'single'
+        );
     }
 }
