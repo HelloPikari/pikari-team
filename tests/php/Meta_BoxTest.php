@@ -66,11 +66,62 @@ class Meta_BoxTest extends TestCase {
         Functions\expect( 'update_post_meta' )
             ->times( 17 );
 
+        Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+
         $_POST['pikari_team_meta_nonce'] = 'valid';
 
         $meta_box = new Meta_Box();
         $meta_box->save_meta( 1 );
 
         unset( $_POST['pikari_team_meta_nonce'] );
+    }
+
+    public function test_save_meta_triggers_validation_notice(): void {
+        Functions\when( 'wp_verify_nonce' )->justReturn( true );
+        Functions\when( 'current_user_can' )->justReturn( true );
+        Functions\when( 'sanitize_text_field' )->returnArg();
+        Functions\when( 'update_post_meta' )->justReturn( true );
+        Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+
+        Actions\expectAdded( 'admin_notices' )->once();
+
+        $_POST['pikari_team_meta_nonce'] = 'valid';
+        $meta_box = new Meta_Box();
+        $meta_box->save_meta( 1 );
+        unset( $_POST['pikari_team_meta_nonce'] );
+    }
+
+    public function test_render_meta_box_outputs_required_asterisks(): void {
+        $post     = \Mockery::mock( 'WP_Post' );
+        $post->ID = 1;
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'wp_nonce_field' )->justReturn( '' );
+
+        $meta_box = new Meta_Box();
+        ob_start();
+        $meta_box->render_meta_box( $post );
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString( 'class="pikari-team-required"', $output );
+    }
+
+    public function test_render_meta_box_uses_email_input_type(): void {
+        $post     = \Mockery::mock( 'WP_Post' );
+        $post->ID = 1;
+        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'wp_nonce_field' )->justReturn( '' );
+
+        $meta_box = new Meta_Box();
+        ob_start();
+        $meta_box->render_meta_box( $post );
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString( 'type="email"', $output );
+        $this->assertStringContainsString( 'type="tel"', $output );
+        $this->assertStringContainsString( 'type="url"', $output );
     }
 }

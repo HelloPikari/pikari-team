@@ -36,6 +36,9 @@ define( 'PIKARI_TEAM_DIR', plugin_dir_path( __FILE__ ) );
  */
 define( 'PIKARI_TEAM_URL', plugin_dir_url( __FILE__ ) );
 
+// Composer autoloader (loads third-party libraries such as chillerlan/php-qrcode).
+require_once PIKARI_TEAM_DIR . 'vendor/autoload.php';
+
 // Autoloader for plugin classes.
 spl_autoload_register(
     function ( $class ) {
@@ -62,6 +65,8 @@ spl_autoload_register(
 function pikari_team_init() {
     load_plugin_textdomain( 'pikari-team', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
+    require_once PIKARI_TEAM_DIR . 'includes/template-tag-functions.php';
+
     new \Pikari\Team\Settings();
     new \Pikari\Team\Post_Type();
     new \Pikari\Team\Meta_Box();
@@ -73,13 +78,21 @@ function pikari_team_init() {
     new \Pikari\Team\PWA();
     new \Pikari\Team\Shortcode();
 
-    // Register the card embed block.
-    $block_dir = PIKARI_TEAM_DIR . 'build/blocks/card';
-    if ( file_exists( $block_dir ) ) {
-        register_block_type( $block_dir );
-    }
+    // Register default card rendering hooks.
+    \Pikari\Team\Card_Renderer::register_defaults();
+
+    // Register the card embed block on init (register_block_type requires init).
+    add_action(
+        'init',
+        function () {
+            $block_dir = PIKARI_TEAM_DIR . 'build/blocks/card';
+            if ( file_exists( $block_dir ) ) {
+                register_block_type( $block_dir );
+            }
+        }
+    );
 }
-add_action( 'init', 'pikari_team_init' );
+add_action( 'plugins_loaded', 'pikari_team_init' );
 
 /**
  * Flush rewrite rules on activation.

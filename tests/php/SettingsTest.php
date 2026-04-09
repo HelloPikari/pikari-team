@@ -51,8 +51,9 @@ class SettingsTest extends TestCase {
     }
 
     public function test_register_setting_is_called_on_admin_init(): void {
-        Actions\expectAdded( 'admin_init' )->once();
+        Actions\expectAdded( 'admin_init' )->twice();
         Actions\expectAdded( 'admin_menu' )->once();
+        Actions\expectAdded( 'update_option_pikari_team_settings' )->once();
 
         new Settings();
     }

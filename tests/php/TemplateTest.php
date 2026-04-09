@@ -66,4 +66,94 @@ class TemplateTest extends TestCase {
 
         new Template();
     }
+
+    public function test_redirect_canonical_filter_is_registered(): void {
+        Filters\expectAdded( 'redirect_canonical' )->once();
+
+        new Template();
+    }
+
+    public function test_prevent_file_redirect_returns_false_for_service_worker(): void {
+        Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
+        $template = new Template();
+
+        $this->assertFalse(
+            $template->prevent_file_redirect(
+                'https://example.com/card/john-doe/service-worker/',
+                'https://example.com/card/john-doe/service-worker'
+            )
+        );
+    }
+
+    public function test_prevent_file_redirect_returns_false_for_manifest(): void {
+        Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
+        $template = new Template();
+
+        $this->assertFalse(
+            $template->prevent_file_redirect(
+                'https://example.com/card/john-doe/manifest/',
+                'https://example.com/card/john-doe/manifest'
+            )
+        );
+    }
+
+    public function test_prevent_file_redirect_returns_false_for_download_vcf(): void {
+        Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
+        $template = new Template();
+
+        $this->assertFalse(
+            $template->prevent_file_redirect(
+                'https://example.com/card/john-doe/download.vcf/',
+                'https://example.com/card/john-doe/download.vcf'
+            )
+        );
+    }
+
+    public function test_prevent_file_redirect_passes_through_normal_urls(): void {
+        Functions\when( 'wp_parse_url' )->alias( 'parse_url' );
+        $template = new Template();
+
+        $this->assertSame(
+            'https://example.com/card/john-doe/',
+            $template->prevent_file_redirect(
+                'https://example.com/card/john-doe/',
+                'https://example.com/card/john-doe'
+            )
+        );
+    }
+
+    public function test_single_template_filter_is_registered(): void {
+        Filters\expectAdded( 'single_template' )->once();
+
+        new Template();
+    }
+
+    public function test_single_template_loads_plugin_template_for_team_member(): void {
+        Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'locate_template' )->justReturn( '' );
+
+        $template = new Template();
+        $result   = $template->load_single_template( '/default/template.php' );
+
+        $this->assertStringContainsString( 'templates/single-pikari_team_member.php', $result );
+    }
+
+    public function test_single_template_defers_to_theme_template(): void {
+        Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'locate_template' )->justReturn( '/theme/single-pikari_team_member.php' );
+
+        $template = new Template();
+        $result   = $template->load_single_template( '/default/template.php' );
+
+        $this->assertSame( '/theme/single-pikari_team_member.php', $result );
+    }
+
+    public function test_single_template_ignores_other_post_types(): void {
+        Functions\when( 'get_post_type' )->justReturn( 'post' );
+
+        $template = new Template();
+        $result   = $template->load_single_template( '/default/template.php' );
+
+        $this->assertSame( '/default/template.php', $result );
+    }
 }

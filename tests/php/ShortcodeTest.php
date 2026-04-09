@@ -4,6 +4,7 @@ namespace Pikari\Tests\Team;
 
 use Pikari\Tests\TestCase;
 use Pikari\Team\Shortcode;
+use Brain\Monkey\Actions;
 use Brain\Monkey\Functions;
 
 class ShortcodeTest extends TestCase {
@@ -34,8 +35,15 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_resolves_slug_to_post_id(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
-        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'get_post_field' )->justReturn( 'john-doe' );
+        Functions\when( 'home_url' )->returnArg();
         Functions\expect( 'get_posts' )
             ->once()
             ->with( \Mockery::on( function ( $args ) {
@@ -52,8 +60,15 @@ class ShortcodeTest extends TestCase {
 
     public function test_shortcode_uses_id_attribute_directly(): void {
         Functions\when( 'add_shortcode' )->justReturn( null );
-        Functions\when( 'get_post_meta' )->justReturn( '' );
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'get_post_field' )->justReturn( 'test' );
+        Functions\when( 'home_url' )->returnArg();
         Functions\expect( 'get_posts' )->never();
 
         $shortcode = new Shortcode();
@@ -66,5 +81,24 @@ class ShortcodeTest extends TestCase {
         $result = Shortcode::render_card( 0 );
 
         $this->assertSame( '', $result );
+    }
+
+    public function test_render_card_fires_embed_hooks(): void {
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'get_post_field' )->justReturn( 'test' );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );
+        Functions\when( 'home_url' )->returnArg();
+
+        // Shortcode uses 'shortcode' context → only header+contact hooks.
+        Actions\expectDone( 'pikari_team_card_header' )->once();
+        Actions\expectDone( 'pikari_team_card_contact' )->once();
+        Actions\expectDone( 'pikari_team_card_address' )->never();
+
+        Shortcode::render_card( 1 );
     }
 }

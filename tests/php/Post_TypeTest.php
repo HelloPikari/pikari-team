@@ -4,8 +4,8 @@ namespace Pikari\Tests\Team;
 
 use Pikari\Tests\TestCase;
 use Pikari\Team\Post_Type;
+use Brain\Monkey\Filters;
 use Brain\Monkey\Functions;
-use Brain\Monkey\Actions;
 
 class Post_TypeTest extends TestCase {
 
@@ -68,11 +68,11 @@ class Post_TypeTest extends TestCase {
         $post_type->register();
     }
 
-    public function test_register_post_meta_called_for_all_17_fields(): void {
+    public function test_register_post_meta_called_for_all_18_fields(): void {
         Functions\when( 'get_option' )->justReturn( [] );
         Functions\when( 'register_post_type' )->justReturn( true );
         Functions\expect( 'register_post_meta' )
-            ->times( 17 )
+            ->times( 18 )
             ->with( 'pikari_team_member', \Mockery::type( 'string' ), \Mockery::type( 'array' ) );
 
         $post_type = new Post_Type();
@@ -90,6 +90,22 @@ class Post_TypeTest extends TestCase {
                 } )
             );
         Functions\when( 'register_post_meta' )->justReturn( true );
+
+        $post_type = new Post_Type();
+        $post_type->register();
+    }
+
+    public function test_post_type_args_are_filterable(): void {
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'register_post_meta' )->justReturn( true );
+
+        Filters\expectApplied( 'pikari_team_post_type_args' )
+            ->once()
+            ->with( \Mockery::type( 'array' ) );
+
+        Functions\expect( 'register_post_type' )
+            ->once()
+            ->with( 'pikari_team_member', \Mockery::type( 'array' ) );
 
         $post_type = new Post_Type();
         $post_type->register();

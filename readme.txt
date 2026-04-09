@@ -1,5 +1,5 @@
 === Pikari Team ===
-Contributors: pikarinc
+Contributors: pikari
 Tags: gutenberg, blocks, wordpress
 Requires at least: 6.8
 Tested up to: 6.8
