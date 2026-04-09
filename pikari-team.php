@@ -95,6 +95,16 @@ function pikari_team_init() {
 add_action( 'plugins_loaded', 'pikari_team_init' );
 
 /**
+ * Check for plugin updates via GitHub releases.
+ */
+$pikari_team_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+    'https://github.com/HelloPikari/pikari-team/',
+    __FILE__,
+    'pikari-team'
+);
+$pikari_team_update_checker->getVcsApi()->enableReleaseAssets( '/pikari-team.*\.zip/' );
+
+/**
  * Flush rewrite rules on activation.
  */
 function pikari_team_activate() {
