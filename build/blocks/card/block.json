@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "pikari-team/card",
+  "version": "0.1.0",
+  "title": "Team Member Card",
+  "category": "widgets",
+  "icon": "id-alt",
+  "description": "Display an embeddable team member business card.",
+  "textdomain": "pikari-team",
+  "attributes": {
+    "postId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": true
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}
