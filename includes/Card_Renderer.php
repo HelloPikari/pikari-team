@@ -75,6 +75,11 @@ class Card_Renderer {
         add_action( 'pikari_team_card_carousel', [ self::class, 'render_carousel' ], 10, 2 );
         add_action( 'pikari_team_carousel_slide_qr', [ self::class, 'render_carousel_slide_qr' ], 10, 2 );
         add_action( 'pikari_team_carousel_slide_contact', [ self::class, 'render_carousel_slide_contact' ], 10, 2 );
+        add_action( 'pikari_team_contact_phone', [ self::class, 'render_contact_phone' ], 10, 2 );
+        add_action( 'pikari_team_contact_cell', [ self::class, 'render_contact_cell' ], 10, 2 );
+        add_action( 'pikari_team_contact_email', [ self::class, 'render_contact_email' ], 10, 2 );
+        add_action( 'pikari_team_contact_website', [ self::class, 'render_contact_website' ], 10, 2 );
+        add_action( 'pikari_team_contact_address', [ self::class, 'render_contact_address' ], 10, 2 );
     }
 
     /**
@@ -337,47 +342,106 @@ class Card_Renderer {
      * @return void
      */
     public static function render_carousel_slide_contact( array $data, string $context ): void {
-        if ( $data['has_phone'] || $data['has_cell'] || $data['has_email'] || $data['has_website'] ) {
-            echo '<div class="pikari-team-card__contact">';
+        /**
+         * Filters the order of contact elements in the carousel slide.
+         *
+         * Each element corresponds to a `pikari_team_contact_{element}` action hook.
+         *
+         * @param string[] $elements Contact element names in render order.
+         */
+        $default_elements = [
+            'phone',
+            'cell',
+            'email',
+            'website',
+            'address',
+        ];
+        $elements         = apply_filters( 'pikari_team_contact_elements', $default_elements );
 
-            if ( $data['has_phone'] ) {
-                echo '<a href="tel:' . esc_attr( $data['phone'] ) . '" class="pikari-team-card__link">';
-                echo '<span class="pikari-team-card__label">' . esc_html__( 'Phone', 'pikari-team' ) . '</span>';
-                echo '<span class="pikari-team-card__value">' . esc_html( $data['phone'] ) . '</span>';
-                echo '</a>';
-            }
-
-            if ( $data['has_cell'] ) {
-                echo '<a href="tel:' . esc_attr( $data['cell'] ) . '" class="pikari-team-card__link">';
-                echo '<span class="pikari-team-card__label">' . esc_html__( 'Cell', 'pikari-team' ) . '</span>';
-                echo '<span class="pikari-team-card__value">' . esc_html( $data['cell'] ) . '</span>';
-                echo '</a>';
-            }
-
-            if ( $data['has_email'] ) {
-                echo '<a href="mailto:' . esc_attr( $data['email'] ) . '" class="pikari-team-card__link">';
-                echo '<span class="pikari-team-card__label">' . esc_html__( 'Email', 'pikari-team' ) . '</span>';
-                echo '<span class="pikari-team-card__value">' . esc_html( $data['email'] ) . '</span>';
-                echo '</a>';
-            }
-
-            if ( $data['has_website'] ) {
-                echo '<a href="' . esc_url( $data['website'] ) . '" class="pikari-team-card__link" target="_blank" rel="noopener noreferrer">';
-                echo '<span class="pikari-team-card__label">' . esc_html__( 'Website', 'pikari-team' ) . '</span>';
-                echo '<span class="pikari-team-card__value">' . esc_html( $data['website'] ) . '</span>';
-                echo '</a>';
-            }
-
-            echo '</div>';
+        foreach ( $elements as $element ) {
+            do_action( 'pikari_team_contact_' . $element, $data, $context );
         }
+    }
 
-        if ( $data['has_address'] ) {
-            $formatted = Template_Tags::get_formatted_address_from_data( $data );
-
-            echo '<div class="pikari-team-card__address">';
-            echo '<span class="pikari-team-card__label">' . esc_html__( 'Address', 'pikari-team' ) . '</span>';
-            echo '<span class="pikari-team-card__value">' . esc_html( $formatted ) . '</span>';
-            echo '</div>';
+    /**
+     * Default phone element.
+     *
+     * @param array  $data    Member data.
+     * @param string $context Rendering context.
+     */
+    public static function render_contact_phone( array $data, string $context ): void {
+        if ( ! $data['has_phone'] ) {
+            return;
         }
+        echo '<a href="tel:' . esc_attr( $data['phone'] ) . '" class="pikari-team-card__link">';
+        echo '<span class="pikari-team-card__label">' . esc_html__( 'Phone', 'pikari-team' ) . '</span>';
+        echo '<span class="pikari-team-card__value">' . esc_html( $data['phone'] ) . '</span>';
+        echo '</a>';
+    }
+
+    /**
+     * Default cell element.
+     *
+     * @param array  $data    Member data.
+     * @param string $context Rendering context.
+     */
+    public static function render_contact_cell( array $data, string $context ): void {
+        if ( ! $data['has_cell'] ) {
+            return;
+        }
+        echo '<a href="tel:' . esc_attr( $data['cell'] ) . '" class="pikari-team-card__link">';
+        echo '<span class="pikari-team-card__label">' . esc_html__( 'Cell', 'pikari-team' ) . '</span>';
+        echo '<span class="pikari-team-card__value">' . esc_html( $data['cell'] ) . '</span>';
+        echo '</a>';
+    }
+
+    /**
+     * Default email element.
+     *
+     * @param array  $data    Member data.
+     * @param string $context Rendering context.
+     */
+    public static function render_contact_email( array $data, string $context ): void {
+        if ( ! $data['has_email'] ) {
+            return;
+        }
+        echo '<a href="mailto:' . esc_attr( $data['email'] ) . '" class="pikari-team-card__link">';
+        echo '<span class="pikari-team-card__label">' . esc_html__( 'Email', 'pikari-team' ) . '</span>';
+        echo '<span class="pikari-team-card__value">' . esc_html( $data['email'] ) . '</span>';
+        echo '</a>';
+    }
+
+    /**
+     * Default website element.
+     *
+     * @param array  $data    Member data.
+     * @param string $context Rendering context.
+     */
+    public static function render_contact_website( array $data, string $context ): void {
+        if ( ! $data['has_website'] ) {
+            return;
+        }
+        echo '<a href="' . esc_url( $data['website'] ) . '" class="pikari-team-card__link" target="_blank" rel="noopener noreferrer">';
+        echo '<span class="pikari-team-card__label">' . esc_html__( 'Website', 'pikari-team' ) . '</span>';
+        echo '<span class="pikari-team-card__value">' . esc_html( $data['website'] ) . '</span>';
+        echo '</a>';
+    }
+
+    /**
+     * Default address element.
+     *
+     * @param array  $data    Member data.
+     * @param string $context Rendering context.
+     */
+    public static function render_contact_address( array $data, string $context ): void {
+        if ( ! $data['has_address'] ) {
+            return;
+        }
+        $formatted = Template_Tags::get_formatted_address_from_data( $data );
+
+        echo '<div class="pikari-team-card__address">';
+        echo '<span class="pikari-team-card__label">' . esc_html__( 'Address', 'pikari-team' ) . '</span>';
+        echo '<span class="pikari-team-card__value">' . esc_html( $formatted ) . '</span>';
+        echo '</div>';
     }
 }
