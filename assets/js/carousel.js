@@ -42,28 +42,4 @@
 			} );
 		} );
 	} );
-
-	// Looping: when scroll settles at an edge, jump to the opposite end.
-	let scrollTimer;
-	track.addEventListener( 'scroll', function() {
-		clearTimeout( scrollTimer );
-		scrollTimer = setTimeout( function() {
-			const maxScroll = track.scrollWidth - track.clientWidth;
-			if ( track.scrollLeft <= 0 ) {
-				// At the start — loop to last slide.
-				requestAnimationFrame( function() {
-					track.style.scrollBehavior = 'auto';
-					track.scrollLeft = maxScroll;
-					track.style.scrollBehavior = '';
-				} );
-			} else if ( track.scrollLeft >= maxScroll - 1 ) {
-				// At the end — loop to first slide.
-				requestAnimationFrame( function() {
-					track.style.scrollBehavior = 'auto';
-					track.scrollLeft = 0;
-					track.style.scrollBehavior = '';
-				} );
-			}
-		}, 150 );
-	} );
 }() );
