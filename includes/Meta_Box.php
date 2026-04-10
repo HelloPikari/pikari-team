@@ -68,6 +68,31 @@ class Meta_Box {
             'normal',
             'high'
         );
+
+        add_meta_box(
+            'pikari-team-card-url',
+            __( 'Digital Business Card', 'pikari-team' ),
+            [ $this, 'render_card_url_meta_box' ],
+            'pikari_team_member',
+            'side',
+            'default'
+        );
+    }
+
+    public function render_card_url_meta_box( $post ): void {
+        if ( 'publish' !== $post->post_status ) {
+            echo '<p class="description">' . esc_html__( 'Publish this post to generate the card URL.', 'pikari-team' ) . '</p>';
+            return;
+        }
+
+        $settings = get_option( Settings::OPTION_KEY, [] );
+        $base     = $settings['url_base'] ?? 'card';
+        $card_url = home_url( '/' . $base . '/' . $post->post_name . '/' );
+
+        echo '<p>';
+        echo '<input type="text" value="' . esc_url( $card_url ) . '" class="widefat" readonly onclick="this.select();" />';
+        echo '</p>';
+        echo '<p class="description">' . esc_html__( 'Click to select, then copy.', 'pikari-team' ) . '</p>';
     }
 
     /**
