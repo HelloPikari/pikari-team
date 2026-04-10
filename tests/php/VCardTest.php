@@ -187,6 +187,7 @@ class VCardTest extends TestCase {
     public function test_include_photo_true_omits_when_no_featured_image(): void {
         $this->mock_post_meta( 1, $this->get_standard_meta() );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( false );
+        Functions\when( 'get_post_thumbnail_id' )->justReturn( 0 );
 
         $vcard  = new VCard();
         $result = $vcard->generate_vcard( 1, true );

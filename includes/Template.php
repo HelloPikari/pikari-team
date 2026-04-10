@@ -89,7 +89,7 @@ class Template {
      * @return string The template path.
      */
     public function load_single_template( string $template ): string {
-        if ( 'pikari_team_member' !== get_post_type() ) {
+        if ( Post_Type::CPT_SLUG !== get_post_type() ) {
             return $template;
         }
 
@@ -116,7 +116,7 @@ class Template {
 
         $posts = get_posts(
             [
-                'post_type'      => 'pikari_team_member',
+                'post_type'      => Post_Type::CPT_SLUG,
                 'name'           => $slug,
                 'posts_per_page' => 1,
                 'post_status'    => 'publish',
