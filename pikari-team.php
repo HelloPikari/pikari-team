@@ -3,7 +3,7 @@
  * Plugin Name: Pikari Team
  * Plugin URI:  https://pikari.io
  * Description: Team member CPT with digital business cards, PWA-enabled card pages, vCard QR codes, and customizable card templates
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Pikari Inc.
  * Author URI:  https://pikari.io
  * License:     GPL-2.0-or-later
@@ -11,6 +11,7 @@
  * Text Domain: pikari-team
  * Domain Path: /languages
  * Requires at least: 6.8
+ * Tested up to:      6.9
  * Requires PHP: 8.2
  *
  * @package pikari-team
@@ -24,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin version.
  */
-define( 'PIKARI_TEAM_VERSION', '1.0.0' );
+define( 'PIKARI_TEAM_VERSION', '1.0.1' );
 
 /**
  * Plugin directory path.
