@@ -70,12 +70,9 @@ class VCard {
         }
 
         if ( $include_photo ) {
-            $photo_url = get_the_post_thumbnail_url( $post_id, 'medium' );
-            if ( $photo_url ) {
-                list( $photo_data, $photo_type ) = $this->get_photo_data( $post_id );
-                if ( $photo_data ) {
-                    $lines[] = 'PHOTO;ENCODING=b;TYPE=' . $photo_type . ':' . $photo_data;
-                }
+            list( $photo_data, $photo_type ) = $this->get_photo_data( $post_id );
+            if ( $photo_data ) {
+                $lines[] = 'PHOTO;ENCODING=b;TYPE=' . $photo_type . ':' . $photo_data;
             }
         }
 
@@ -95,8 +92,9 @@ class VCard {
      */
     public function handle_download( $post ): void {
         $vcard_string = $this->generate_vcard( $post->ID, true );
-        $data         = Template_Tags::get_member_data( $post->ID );
-        $name         = $data['full_name'] ?: 'contact';
+        $first_name   = (string) get_post_meta( $post->ID, 'pikari_team_first_name', true );
+        $last_name    = (string) get_post_meta( $post->ID, 'pikari_team_last_name', true );
+        $name         = trim( $first_name . ' ' . $last_name ) ?: 'contact';
 
         nocache_headers();
         header( 'Content-Type: text/vcard; charset=utf-8' );

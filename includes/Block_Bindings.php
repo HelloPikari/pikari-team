@@ -39,7 +39,7 @@ class Block_Bindings {
     public function enqueue_editor_assets(): void {
         $screen = get_current_screen();
 
-        if ( ! $screen || 'pikari_team_member' !== $screen->post_type ) {
+        if ( ! $screen || Post_Type::CPT_SLUG !== $screen->post_type ) {
             return;
         }
 
