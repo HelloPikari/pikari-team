@@ -16,8 +16,9 @@
 		}
 	},
 	"require": {
-		"php": ">=8.4",
-		"chillerlan/php-qrcode": "^5.0"
+		"php": ">=8.2",
+		"chillerlan/php-qrcode": "^5.0",
+		"yahnis-elsts/plugin-update-checker": "^5.6"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "^3.10",

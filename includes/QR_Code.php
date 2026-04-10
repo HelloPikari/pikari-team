@@ -28,19 +28,55 @@ class QR_Code {
             return '';
         }
 
+        $defaults = [
+            'outputType'           => QROutputInterface::MARKUP_SVG,
+            'eccLevel'             => EccLevel::M,
+            'addQuietzone'         => true,
+            'outputBase64'         => false,
+            'drawCircularModules'  => false,
+            'circleRadius'         => 0.45,
+            'connectPaths'         => false,
+            'addLogoSpace'         => false,
+            'logoSpaceWidth'       => null,
+            'logoSpaceHeight'      => null,
+            'logoSpaceStartX'      => null,
+            'logoSpaceStartY'      => null,
+            'cssClass'             => 'pikari-team-qr',
+            'svgDefs'              => '',
+            'moduleValues'         => [],
+        ];
+
+        /**
+         * Filters the QR code generation options.
+         *
+         * Allows theme developers to customize the QR code appearance:
+         * circular modules, colors, logo space, SVG definitions, etc.
+         *
+         * @param array $qr_options QR code options (keys map to chillerlan/php-qrcode QROptions properties).
+         * @param int   $post_id    The team member post ID.
+         */
+        $qr_options = apply_filters( 'pikari_team_qr_options', $defaults, $post_id );
+
         $options = new QROptions();
 
         // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- third-party library.
-        $options->outputType = QROutputInterface::MARKUP_SVG;
-        // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- third-party library.
-        $options->eccLevel = EccLevel::M;
-        // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- third-party library.
-        $options->addQuietzone = true;
-        // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- third-party library.
-        $options->outputBase64 = false;
+        foreach ( $qr_options as $key => $value ) {
+            if ( null !== $value ) {
+                // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- third-party library.
+                $options->{$key} = $value;
+            }
+        }
 
-        $qr = new QRCodeLib( $options );
+        /**
+         * Filters the QR code SVG markup after generation.
+         *
+         * Use this to wrap the SVG with additional markup, e.g. a logo overlay.
+         *
+         * @param string $svg     The generated QR code SVG markup.
+         * @param int    $post_id The team member post ID.
+         */
+        $svg = ( new QRCodeLib( $options ) )->render( $vcard_string );
 
-        return $qr->render( $vcard_string );
+        return apply_filters( 'pikari_team_qr_svg', $svg, $post_id );
     }
 }

@@ -27,6 +27,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Composer production dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
       - name: Build production
         run: npm run build
 
@@ -41,12 +49,11 @@ jobs:
 
           echo "Creating production distribution..."
           rsync -av \
+            --filter='- /src/' \
             --exclude='.git*' \
             --exclude='.github' \
             --exclude='node_modules' \
-            --exclude='src' \
             --exclude='tests' \
-            --exclude='vendor' \
             --exclude='.*' \
             --exclude='*.log' \
             --exclude='*.lock' \
@@ -56,6 +63,9 @@ jobs:
             --exclude='*.md' \
             --exclude='bin' \
             --exclude='_playground' \
+            --exclude='_log' \
+            --exclude='_specs' \
+            --exclude='docs' \
             --exclude='.husky' \
             --exclude='*.sh' \
             --exclude='phpcs.xml' \

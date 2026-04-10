@@ -5,7 +5,6 @@ namespace Pikari\Tests\Team;
 use Pikari\Tests\TestCase;
 use Pikari\Team\Block_Bindings;
 use Brain\Monkey\Functions;
-use Brain\Monkey\Actions;
 
 class Block_BindingsTest extends TestCase {
 
@@ -24,11 +23,14 @@ class Block_BindingsTest extends TestCase {
             ->with( 42, 'pikari_team_email', true )
             ->andReturn( 'test@example.com' );
 
+        $block          = new \stdClass();
+        $block->context = [ 'postId' => 42 ];
+
         $bindings = new Block_Bindings();
         $result   = $bindings->get_binding_value(
             [ 'key' => 'pikari_team_email' ],
-            null,
-            [ 'postId' => 42 ]
+            $block,
+            'content'
         );
 
         $this->assertSame( 'test@example.com', $result );

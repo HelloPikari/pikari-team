@@ -1,3 +1,10 @@
 {
-	"plugins": ["."]
+	"phpVersion": "8.4",
+	"plugins": ["."],
+	"port": 5880,
+	"env": {
+		"tests": {
+			"port": 5881
+		}
+	}
 }

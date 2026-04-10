@@ -1,6 +1,6 @@
 {
 	"name": "pikari-team",
-	"version": "0.1.0",
+	"version": "0.3.0",
 	"description": "Team member CPT with digital business cards, PWA-enabled card pages, vCard QR codes, and customizable card templates",
 	"author": "Pikari Inc. <development@pikari.io>",
 	"homepage": "https://pikari.io",
@@ -14,8 +14,8 @@
 		"lint:fix": "npm run lint:js:fix && npm run lint:css:fix && npm run lint:php:fix && npm run lint:md:fix",
 		"lint:js": "wp-scripts lint-js src",
 		"lint:js:fix": "wp-scripts lint-js src --fix",
-		"lint:css": "wp-scripts lint-style src/**/*.{css,scss}",
-		"lint:css:fix": "wp-scripts lint-style src/**/*.{css,scss} --fix",
+		"lint:css": "wp-scripts lint-style 'assets/css/**/*.css'",
+		"lint:css:fix": "wp-scripts lint-style 'assets/css/**/*.css' --fix",
 		"lint:php": "composer lint",
 		"lint:php:fix": "composer lint:fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",

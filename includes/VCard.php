@@ -14,19 +14,21 @@ class VCard {
     }
 
     public function generate_vcard( int $post_id, bool $include_photo = true ): string {
-        $first_name = (string) get_post_meta( $post_id, 'pikari_team_first_name', true );
-        $last_name  = (string) get_post_meta( $post_id, 'pikari_team_last_name', true );
-        $job_title  = (string) get_post_meta( $post_id, 'pikari_team_job_title', true );
-        $email      = (string) get_post_meta( $post_id, 'pikari_team_email', true );
-        $phone      = (string) get_post_meta( $post_id, 'pikari_team_phone', true );
-        $cell       = (string) get_post_meta( $post_id, 'pikari_team_cell', true );
-        $company    = (string) get_post_meta( $post_id, 'pikari_team_company', true );
-        $website    = (string) get_post_meta( $post_id, 'pikari_team_website', true );
-        $street     = (string) get_post_meta( $post_id, 'pikari_team_address_street', true );
-        $city       = (string) get_post_meta( $post_id, 'pikari_team_address_city', true );
-        $state      = (string) get_post_meta( $post_id, 'pikari_team_address_state', true );
-        $zip        = (string) get_post_meta( $post_id, 'pikari_team_address_zip', true );
-        $country    = (string) get_post_meta( $post_id, 'pikari_team_address_country', true );
+        $data = Template_Tags::get_member_data( $post_id );
+
+        $first_name = $data['first_name'];
+        $last_name  = $data['last_name'];
+        $job_title  = $data['job_title'];
+        $email      = $data['email'];
+        $phone      = $data['phone'];
+        $cell       = $data['cell'];
+        $company    = $data['company'];
+        $website    = $data['website'];
+        $street     = $data['address']['street'];
+        $city       = $data['address']['city'];
+        $state      = $data['address']['state'];
+        $zip        = $data['address']['zip'];
+        $country    = $data['address']['country'];
 
         $lines   = [];
         $lines[] = 'BEGIN:VCARD';
@@ -93,13 +95,8 @@ class VCard {
      */
     public function handle_download( $post ): void {
         $vcard_string = $this->generate_vcard( $post->ID, true );
-        $first_name   = get_post_meta( $post->ID, 'pikari_team_first_name', true );
-        $last_name    = get_post_meta( $post->ID, 'pikari_team_last_name', true );
-        $name         = trim( $first_name . ' ' . $last_name );
-
-        if ( empty( $name ) ) {
-            $name = 'contact';
-        }
+        $data         = Template_Tags::get_member_data( $post->ID );
+        $name         = $data['full_name'] ?: 'contact';
 
         nocache_headers();
         header( 'Content-Type: text/vcard; charset=utf-8' );

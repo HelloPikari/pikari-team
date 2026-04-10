@@ -70,13 +70,11 @@ class PWA {
         $cache_name   = 'pikari-card-' . $slug . '-v' . $version_hash;
 
         $card_url     = '/' . $base . '/' . $slug . '/';
-        $manifest_url = '/' . $base . '/' . $slug . '/manifest.json';
-        $css_url      = PIKARI_TEAM_URL . 'assets/css/card.css';
+        $manifest_url = '/' . $base . '/' . $slug . '/manifest';
 
         $precache_urls = [
             $card_url,
             $manifest_url,
-            $css_url,
         ];
 
         $headshot = get_the_post_thumbnail_url( $post->ID, 'medium' );
@@ -92,11 +90,14 @@ class PWA {
 
         return <<<JS
 const CACHE_NAME = '{$cache_name}';
+const START_URL = '{$card_url}';
 const PRECACHE_URLS = {$urls_json};
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+        caches.open(CACHE_NAME).then((cache) =>
+            Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(url)))
+        )
     );
     self.skipWaiting();
 });
@@ -113,9 +114,29 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request).then((r) => r || caches.match(START_URL)))
+        );
+        return;
+    }
     event.respondWith(
         caches.match(event.request).then((cached) => cached || fetch(event.request))
     );
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'cache-page') {
+        event.waitUntil(
+            caches.open(CACHE_NAME).then((cache) => cache.add(event.data.url))
+        );
+    }
 });
 JS;
     }

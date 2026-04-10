@@ -27,6 +27,7 @@ class Post_Type {
         'pikari_team_address_country',
         'pikari_team_linkedin',
         'pikari_team_twitter',
+        'pikari_team_card_template',
     ];
 
     public function __construct() {
@@ -85,52 +86,78 @@ class Post_Type {
             ),
         ];
 
-        register_post_type(
-            'pikari_team_member',
-            [
-                'labels'       => $labels,
-                'public'       => true,
-                'has_archive'  => false,
-                'show_in_rest' => true,
-                'supports'     => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ],
-                'menu_icon'    => 'dashicons-id-alt',
-                'template'     => [
-                    [ 'core/post-featured-image' ],
+        $slug = $settings['post_type_slug'] ?? 'team';
+
+        $args = [
+            'labels'       => $labels,
+            'public'       => true,
+            'has_archive'  => false,
+            'show_in_rest' => true,
+            'supports'     => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes' ],
+            'menu_icon'    => 'dashicons-id-alt',
+            'rewrite'      => [
+                'slug'       => $slug,
+                'with_front' => false,
+            ],
+            'template'     => [
+                [ 'core/post-featured-image' ],
+                [
+                    'core/heading',
                     [
-                        'core/heading',
-                        [
-                            'metadata' => [
-                                'bindings' => [
-                                    'content' => [
-                                        'source' => 'pikari-team/meta',
-                                        'args'   => [ 'key' => 'pikari_team_first_name' ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'core/paragraph',
-                        [
-                            'metadata' => [
-                                'bindings' => [
-                                    'content' => [
-                                        'source' => 'pikari-team/meta',
-                                        'args'   => [ 'key' => 'pikari_team_job_title' ],
-                                    ],
+                        'metadata' => [
+                            'bindings' => [
+                                'content' => [
+                                    'source' => 'pikari-team/meta',
+                                    'args'   => [ 'key' => 'pikari_team_first_name' ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-            ]
-        );
+                [
+                    'core/paragraph',
+                    [
+                        'metadata' => [
+                            'bindings' => [
+                                'content' => [
+                                    'source' => 'pikari-team/meta',
+                                    'args'   => [ 'key' => 'pikari_team_job_title' ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        /**
+         * Filters the arguments passed to register_post_type() for the pikari_team_member CPT.
+         *
+         * Allows theme and plugin developers to modify CPT configuration — e.g. to add
+         * taxonomy support, change capabilities, or alter rewrite rules — without
+         * needing to deregister and re-register the post type.
+         *
+         * @param array $args The post type registration arguments.
+         */
+        $args = apply_filters( 'pikari_team_post_type_args', $args );
+
+        register_post_type( 'pikari_team_member', $args );
 
         $this->register_meta_fields();
     }
 
     private function register_meta_fields(): void {
-        foreach ( self::META_FIELDS as $field ) {
+        /**
+         * Filters the list of meta fields registered for team members.
+         *
+         * Allows themes and plugins to add or remove meta fields from
+         * both REST API registration and the admin meta box.
+         *
+         * @param string[] $fields Array of meta field keys (prefixed with pikari_team_).
+         */
+        $fields = apply_filters( 'pikari_team_meta_fields', self::META_FIELDS );
+
+        foreach ( $fields as $field ) {
             register_post_meta(
                 'pikari_team_member',
                 $field,
@@ -145,6 +172,6 @@ class Post_Type {
     }
 
     public static function get_meta_fields(): array {
-        return self::META_FIELDS;
+        return apply_filters( 'pikari_team_meta_fields', self::META_FIELDS );
     }
 }
