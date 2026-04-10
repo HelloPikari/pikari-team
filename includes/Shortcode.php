@@ -28,7 +28,7 @@ class Shortcode {
         if ( ! $post_id && ! empty( $atts['slug'] ) ) {
             $posts = get_posts(
                 [
-                    'post_type'      => 'pikari_team_member',
+                    'post_type'      => Post_Type::CPT_SLUG,
                     'name'           => sanitize_title( $atts['slug'] ),
                     'posts_per_page' => 1,
                     'post_status'    => 'publish',

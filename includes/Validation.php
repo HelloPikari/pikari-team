@@ -120,7 +120,7 @@ class Validation {
      * @return void
      */
     public static function maybe_add_admin_notice( int $post_id ): void {
-        if ( 'pikari_team_member' !== get_post_type( $post_id ) ) {
+        if ( Post_Type::CPT_SLUG !== get_post_type( $post_id ) ) {
             return;
         }
 

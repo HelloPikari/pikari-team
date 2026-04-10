@@ -9,6 +9,8 @@ namespace Pikari\Team;
 
 class Post_Type {
 
+    public const CPT_SLUG = 'pikari_team_member';
+
     private const META_FIELDS = [
         'pikari_team_first_name',
         'pikari_team_last_name',
@@ -141,7 +143,7 @@ class Post_Type {
          */
         $args = apply_filters( 'pikari_team_post_type_args', $args );
 
-        register_post_type( 'pikari_team_member', $args );
+        register_post_type( self::CPT_SLUG, $args );
 
         $this->register_meta_fields();
     }
@@ -159,7 +161,7 @@ class Post_Type {
 
         foreach ( $fields as $field ) {
             register_post_meta(
-                'pikari_team_member',
+                self::CPT_SLUG,
                 $field,
                 [
                     'type'              => 'string',

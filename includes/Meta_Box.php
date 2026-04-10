@@ -56,7 +56,7 @@ class Meta_Box {
 
     public function register_meta_box(): void {
         if ( function_exists( 'use_block_editor_for_post_type' )
-            && use_block_editor_for_post_type( 'pikari_team_member' ) ) {
+            && use_block_editor_for_post_type( Post_Type::CPT_SLUG ) ) {
             return;
         }
 
@@ -64,7 +64,7 @@ class Meta_Box {
             'pikari-team-meta',
             __( 'Team Member Details', 'pikari-team' ),
             [ $this, 'render_meta_box' ],
-            'pikari_team_member',
+            Post_Type::CPT_SLUG,
             'normal',
             'high'
         );
@@ -73,7 +73,7 @@ class Meta_Box {
             'pikari-team-card-url',
             __( 'Digital Business Card', 'pikari-team' ),
             [ $this, 'render_card_url_meta_box' ],
-            'pikari_team_member',
+            Post_Type::CPT_SLUG,
             'side',
             'default'
         );
