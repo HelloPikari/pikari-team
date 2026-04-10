@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'pikari-inc/pikari-team',
-        'pretty_version' => 'v1.0.0',
-        'version' => '1.0.0.0',
-        'reference' => '652735ba1f359a3ada1ee4ea1777f316307aa5fa',
+        'pretty_version' => 'v1.0.1',
+        'version' => '1.0.1.0',
+        'reference' => 'd5a912774ccf09c2f0bc83552094a4639faadf86',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'pikari-inc/pikari-team' => array(
-            'pretty_version' => 'v1.0.0',
-            'version' => '1.0.0.0',
-            'reference' => '652735ba1f359a3ada1ee4ea1777f316307aa5fa',
+            'pretty_version' => 'v1.0.1',
+            'version' => '1.0.1.0',
+            'reference' => 'd5a912774ccf09c2f0bc83552094a4639faadf86',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
