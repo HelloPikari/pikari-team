@@ -28,6 +28,7 @@ $slug        = get_post_field( 'post_name', $post_id );
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo esc_html( $data['full_name'] ); ?> — <?php echo esc_html( $data['company'] ); ?></title>
 
+    <meta name="robots" content="noindex, nofollow">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="<?php echo esc_attr( $brand_color ); ?>">
@@ -96,6 +97,17 @@ $slug        = get_post_field( 'post_name', $post_id );
     ?>
 </head>
 <body class="pikari-team-card-page">
+    <?php
+    /**
+     * Fires at the start of the card page body, before the card container.
+     *
+     * Use this for background elements that should be positioned relative
+     * to the viewport rather than the card.
+     *
+     * @param array $data Structured member data.
+     */
+    do_action( 'pikari_team_card_body_start', $data );
+    ?>
     <div class="pikari-team-card">
         <?php
         /**
