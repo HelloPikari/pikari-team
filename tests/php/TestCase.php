@@ -33,19 +33,6 @@ abstract class TestCase extends PHPUnitTestCase {
         parent::setUp();
         Monkey\setUp();
 
-        // Stub WordPress i18n and escaping functions globally.
-        Monkey\Functions\stubTranslationFunctions();
-        Monkey\Functions\stubEscapeFunctions();
-
-        // Stub common sanitization/utility functions.
-        Monkey\Functions\when( 'wp_unslash' )->returnArg();
-        Monkey\Functions\when( 'sanitize_text_field' )->returnArg();
-        Monkey\Functions\when( 'wp_parse_args' )->alias(
-            function ( $args, $defaults = [] ) {
-                return array_merge( $defaults, (array) $args );
-            }
-        );
-
         // Define common WordPress constants used across plugins.
         if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
             define( 'HOUR_IN_SECONDS', 3600 );
@@ -62,13 +49,6 @@ abstract class TestCase extends PHPUnitTestCase {
      * Tear down Brain\Monkey after each test.
      */
     protected function tearDown(): void {
-        // Bridge Mockery expectation counts into PHPUnit assertion counts
-        // so tests using only Brain\Monkey expectations are not marked risky.
-        $container = \Mockery::getContainer();
-        if ( $container ) {
-            $this->addToAssertionCount( $container->mockery_getExpectationCount() );
-        }
-
         Monkey\tearDown();
         parent::tearDown();
     }
