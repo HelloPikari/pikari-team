@@ -1,5 +1,6 @@
 {
 	"plugin-slug": "pikari-team",
 	"composer-name": "pikari-inc/pikari-team",
-	"composer-description": "Team member CPT with digital business cards, PWA-enabled card pages, vCard QR codes, and customizable card templates"
+	"composer-description": "Team member CPT with digital business cards, PWA-enabled card pages, vCard QR codes, and customizable card templates",
+	"skip-sync": ["tests/php/TestCase.php", "tests/php/bootstrap.php"]
 }
