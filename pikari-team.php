@@ -11,8 +11,8 @@
  * Text Domain: pikari-team
  * Domain Path: /languages
  * Requires at least: 6.8
- * Tested up to:      6.9
- * Requires PHP: 8.2
+ * Tested up to:      7.1
+ * Requires PHP: 8.4
  *
  * @package pikari-team
  */
@@ -102,7 +102,15 @@ $pikari_team_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::bu
     __FILE__,
     'pikari-team'
 );
-$pikari_team_update_checker->getVcsApi()->enableReleaseAssets( '/pikari-team.*\.zip/' );
+$pikari_team_vcs_api = $pikari_team_update_checker->getVcsApi();
+$pikari_team_vcs_api->enableReleaseAssets(
+    '/pikari-team.*\.zip/',
+    // The VCS API's minor-version namespace (e.g. v5p6) isn't guaranteed by
+    // a `use` alias, so REQUIRE_RELEASE_ASSETS is read off the concrete
+    // instance rather than hardcoded, to survive a plugin-update-checker
+    // point release without silently falling back to PREFER_RELEASE_ASSETS.
+    constant( get_class( $pikari_team_vcs_api ) . '::REQUIRE_RELEASE_ASSETS' )
+);
 
 /**
  * Flush rewrite rules on activation.
