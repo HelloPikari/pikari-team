@@ -3,7 +3,7 @@ Contributors: pikari
 Tags: team, business-card, pwa, vcard, qr-code
 Requires at least: 6.8
 Tested up to: 7.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 8.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -50,6 +50,12 @@ See `docs/hooks.md` in the plugin directory for the complete developer reference
 5. Visit /card/{member-slug}/ to see the digital business card
 
 == Changelog ==
+
+= 1.0.2 =
+* Confirmed compatible with WordPress 7.1; minimum PHP is 8.4.
+* The update checker now requires a release ZIP before offering an update, instead of falling back to an automatically generated source archive that contains no compiled assets.
+* Bundled plugin-update-checker updated to 5.7.
+* Composer installs now come from the Pikari package index and use the published release ZIP — the same build this plugin ships everywhere else. Add the repository https://hellopikari.github.io/packages/ and remove any VCS entry for this plugin.
 
 = 1.0.1 =
 * Updated plugin description and tested up to WordPress 6.9
