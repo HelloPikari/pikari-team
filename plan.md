@@ -243,11 +243,13 @@ Build this first because `Post_Type` depends on the admin label setting.
 
 - Register `pikari_team_member` CPT on `init` hook
 - Dynamic labels from settings:
+
   ```php
   $settings = get_option( 'pikari_team_settings', [] );
   $label = $settings['admin_label'] ?? 'Team Members';
   $singular = rtrim( $label, 's' ); // Simple approach, or store both
   ```
+
 - CPT args: `'public' => true`, `'has_archive' => false`, `'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'page-attributes']`, `'show_in_rest' => true` (required for block editor), `'menu_icon' => 'dashicons-id-alt'`
 - Register all meta fields via `register_post_meta( 'pikari_team_member', ... )`:
   - All fields: `'type' => 'string'`, `'single' => true`, `'show_in_rest' => true`, `'sanitize_callback' => 'sanitize_text_field'`
@@ -257,11 +259,13 @@ Build this first because `Post_Type` depends on the admin label setting.
 
 - Hook `add_meta_boxes` to register a meta box for `pikari_team_member`
 - Only load when block editor is NOT active:
+
   ```php
   if ( function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( 'pikari_team_member' ) ) {
       return;
   }
   ```
+
 - Render callback: labeled input fields for all meta, organized in fieldsets (Personal, Company, Address, Social, Card)
 - Save callback on `save_post_pikari_team_member`: verify nonce, check `current_user_can( 'edit_post', $post_id )`, sanitize and save each field via `update_post_meta()`
 - Respect the field visibility setting from Settings
@@ -269,6 +273,7 @@ Build this first because `Post_Type` depends on the admin label setting.
 ### 1d. Block Bindings (`Block_Bindings.php`)
 
 - Register a block bindings source via `register_block_bindings_source()`:
+
   ```php
   register_block_bindings_source( 'pikari-team/meta', [
       'label'              => __( 'Team Member Data', 'pikari-team' ),
@@ -276,8 +281,10 @@ Build this first because `Post_Type` depends on the admin label setting.
       'uses_context'       => [ 'postId', 'postType' ],
   ] );
   ```
+
 - `get_binding_value()` reads from `get_post_meta()` for the given field key
 - Register a CPT block template via the `'template'` arg in `register_post_type()`:
+
   ```php
   'template' => [
       [ 'core/post-featured-image' ],
@@ -295,7 +302,9 @@ Build this first because `Post_Type` depends on the admin label setting.
       ] ],
   ]
   ```
+
 - Enqueue sidebar panel JS on `enqueue_block_editor_assets` (only for `pikari_team_member` post type):
+
   ```php
   $screen = get_current_screen();
   if ( $screen && 'pikari_team_member' === $screen->post_type ) {
@@ -308,6 +317,7 @@ Build this first because `Post_Type` depends on the admin label setting.
 - Use `registerPlugin` from `@wordpress/plugins`
 - Create a `PluginDocumentSettingPanel` with fields for: phone, cell, email, company, department, website, address fields, social links, card template selector
 - Use `useEntityProp` to read/write post meta:
+
   ```js
   const [meta, setMeta] = useEntityProp(
   	'postType',
@@ -317,6 +327,7 @@ Build this first because `Post_Type` depends on the admin label setting.
   // Access: meta.pikari_team_first_name
   // Update: setMeta( { ...meta, pikari_team_first_name: value } )
   ```
+
 - Use `TextControl`, `SelectControl` from `@wordpress/components`
 - Only render when post type is `pikari_team_member`
 
@@ -325,6 +336,7 @@ Build this first because `Post_Type` depends on the admin label setting.
 - Set up `src/editor/index.js` as the entry point that imports `sidebar-panel.js`
 - The build outputs to `build/editor/index.js` and `build/editor/index.asset.php`
 - Enqueue from `Block_Bindings.php` using the asset file pattern:
+
   ```php
   $asset_file = PIKARI_TEAM_DIR . 'build/editor/index.asset.php';
   if ( file_exists( $asset_file ) ) {
@@ -337,6 +349,7 @@ Build this first because `Post_Type` depends on the admin label setting.
       );
   }
   ```
+
 - A custom webpack config may be needed if `@wordpress/scripts` doesn't auto-discover the `src/editor/index.js` entry point alongside `src/blocks/card/index.js`. Configure multiple entry points if necessary.
 
 ### Verify
@@ -379,6 +392,7 @@ Build this first because `Post_Type` depends on the admin label setting.
 ### 2a. Template Routing (`Template.php`)
 
 - On `init`, register rewrite rules:
+
   ```php
   $base = get_option( 'pikari_team_settings', [] )['url_base'] ?? 'card';
   add_rewrite_tag( '%pikari_card_slug%', '([^/]+)' );
@@ -404,6 +418,7 @@ Build this first because `Post_Type` depends on the admin label setting.
       'top'
   );
   ```
+
 - Hook `query_vars` to register `pikari_card_slug` and `pikari_card_action`
 - Hook `template_include` to intercept card routes:
   - Query the `pikari_team_member` post by slug
@@ -429,6 +444,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
 ### 2c. Template Parts (`Template_Parts.php`)
 
 - Filter `default_wp_template_part_areas` to register the `pikari-card` area:
+
   ```php
   add_filter( 'default_wp_template_part_areas', function( $areas ) {
       $areas[] = [
@@ -440,7 +456,9 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
       return $areas;
   } );
   ```
+
 - Create `parts/card-default.html` — block markup with bindings:
+
   ```html
   <!-- wp:group {"layout":{"type":"constrained"}} -->
   <div class="wp-block-group">
@@ -454,6 +472,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
   </div>
   <!-- /wp:group -->
   ```
+
 - Create `parts/card-corporate.html` — more formal, structured layout
 - Create `parts/card-minimal.html` — just name, title, QR code
 - Admins can edit these or create new ones in the Site Editor under Template Parts > Business Cards. Each team member selects which part via `pikari_team_card_template` meta (defaults to `card-default`).
@@ -461,6 +480,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
 ### 2d. Block Templates for Archive/Single
 
 - Create `templates/single-pikari_team_member.html`:
+
   ```html
   <!-- wp:template-part {"slug":"header","area":"header"} /-->
   <!-- wp:group {"layout":{"type":"constrained"}} -->
@@ -472,6 +492,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
   <!-- /wp:group -->
   <!-- wp:template-part {"slug":"footer","area":"footer"} /-->
   ```
+
 - Create `templates/archive-pikari_team_member.html` with a query loop over team members
 - WordPress auto-discovers templates in plugin `templates/` directories (WP 6.7+). Theme authors override by placing their own templates in their theme.
 
@@ -482,9 +503,11 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
   - Uses `templates/card-embed.php` as the template (output buffered)
   - Escapes all output
 - Register shortcode `[pikari_team_card]` with `id` and `slug` attributes:
+
   ```php
   add_shortcode( 'pikari_team_card', [ $this, 'shortcode_handler' ] );
   ```
+
   - If `slug` provided, query by slug to resolve the post ID
   - Call `render_card()` with the resolved ID
 
@@ -557,6 +580,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
 
 - Method: `public function generate_vcard( int $post_id, bool $include_photo = true ): string`
 - Build a vCard 3.0 string:
+
   ```text
   BEGIN:VCARD
   VERSION:3.0
@@ -571,11 +595,13 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
   URL:{website}
   END:VCARD
   ```
+
 - If `$include_photo` is true and post has a featured image:
   - Get the image file path, read its contents
   - Base64 encode: `PHOTO;ENCODING=b;TYPE=JPEG:{base64_data}`
 - **Sanitize vCard special characters:** escape semicolons, commas, and backslashes in field values (these have special meaning in vCard format)
 - Handle the download endpoint (called from `Template.php` when action is `download`):
+
   ```php
   header( 'Content-Type: text/vcard; charset=utf-8' );
   header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $name ) . '.vcf"' );
@@ -638,6 +664,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
 ### 4a. Web App Manifest (`PWA.php`)
 
 - Handler for the `manifest` action (called from `Template.php`):
+
   ```php
   header( 'Content-Type: application/manifest+json' );
   echo wp_json_encode( [
@@ -651,6 +678,7 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
   ] );
   exit;
   ```
+
 - Icons: Use the company logo from plugin settings (generate 192px and 512px via `wp_get_attachment_image_src()` or WordPress image sizes)
 
 ### 4b. Service Worker (`PWA.php`)
@@ -700,16 +728,19 @@ The PWA HTML shell — a complete HTML document independent of the active theme:
 ### 4c. Service Worker Registration (`assets/js/sw-register.js`)
 
 - Vanilla JS, no build step needed:
+
   ```js
   if ('serviceWorker' in navigator) {
   	navigator.serviceWorker.register('./sw.js');
   }
   ```
+
 - Loaded via `<script>` tag in the card standalone template
 
 ### 4d. PWA Meta Tags
 
 - Add to the card standalone template `<head>`:
+
   ```html
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />

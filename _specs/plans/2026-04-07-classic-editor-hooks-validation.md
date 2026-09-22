@@ -2110,7 +2110,7 @@ add_action( 'pikari_team_card_header', function ( array $data, string $context )
 ```
 ````
 
-#### Example: Add QR code to embed context
+### Example: Add QR code to embed context
 
 ```php
 add_action( 'pikari_team_card_qr', function ( array $data, string $context ) {
@@ -2265,8 +2265,6 @@ Place `single-pikari_team_member.php` in your theme to override the plugin's sin
 
 Place `pikari-team/card-standalone.php` in your theme to override the standalone card template entirely.
 
-````
-
 - [ ] **Step 2: Verify PHPDoc is present on all hooks in source files**
 
 Review each `do_action()` and `apply_filters()` call in the source files to ensure PHPDoc comments are present. These were included in the implementation steps above.
@@ -2277,7 +2275,7 @@ Review each `do_action()` and `apply_filters()` call in the source files to ensu
 cd /Users/steveariss/Sites/pikari/wordpress-plugins/pikari-team
 git add docs/hooks.md
 git commit -m "docs: add hooks, filters, and template tags reference"
-````
+```
 
 ---
 

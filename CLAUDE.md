@@ -182,7 +182,7 @@ These are the most frequently needed per-test mocks (beyond the global stubs in 
 
 ### Commit Format
 
-```
+```text
 type: Brief description
 ```
 
@@ -205,7 +205,7 @@ Husky + lint-staged runs automatically on commit:
 
 This project uses a session log system in `_log/` to maintain continuity between sessions.
 
-### At the START of every session:
+### At the START of every session
 
 1. Read `.claude/memory/MEMORY.md` to load project memory and user preferences
 2. Read `_specs/roadmap.md` to understand the current state of the project
@@ -213,7 +213,7 @@ This project uses a session log system in `_log/` to maintain continuity between
 
 These files are your "memory" — treat them as the source of truth for what's been done, how to work, and what's next.
 
-### At the END of every session (or when the user says they're wrapping up):
+### At the END of every session (or when the user says they're wrapping up)
 
 1. **Update `_specs/roadmap.md`** — Check off completed tasks, add new tasks discovered during the session, update the "Last updated" date
 2. **Create or append to `_log/YYYY-MM-DD.md`** — Write a session summary covering:
@@ -224,7 +224,7 @@ These files are your "memory" — treat them as the source of truth for what's b
 3. **Git commit** — Stage all changed files and create a commit. Use a descriptive message summarizing the session's work. Do NOT push unless asked.
 4. Remind the user that the log has been updated and the commit has been created so they can review
 
-### File conventions:
+### File conventions
 
 - `_log/YYYY-MM-DD.md` — Daily session logs. One file per day, append if multiple sessions in a day. Never edit past entries.
 - `_specs/roadmap.md` — Living task list organized by project phase. Evolves over time.

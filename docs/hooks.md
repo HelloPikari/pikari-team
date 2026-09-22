@@ -35,7 +35,7 @@ Six action hooks fire in sequence when a team member card is rendered. Each hook
 | `embed` (card embed block)                                     | header, contact                              |
 | `shortcode` (`[pikari_team_card]`)                             | header, contact                              |
 
-**Example: Replace the header section with a custom layout**
+#### Example: Replace the header section with a custom layout
 
 ```php
 /**
@@ -65,7 +65,7 @@ remove_action( 'pikari_team_card_header', [ 'Pikari\Team\Card_Renderer', 'render
 add_action( 'pikari_team_card_header', 'my_theme_custom_card_header', 10, 2 );
 ```
 
-**Example: Add a QR code to the embed context**
+#### Example: Add a QR code to the embed context
 
 By default the `qr` section does not fire in the `embed` or `shortcode` contexts. You can inject it after the contact section:
 
@@ -87,7 +87,7 @@ function my_plugin_embed_qr( array $data, string $context ): void {
 add_action( 'pikari_team_card_contact', 'my_plugin_embed_qr', 20, 2 );
 ```
 
-**Example: Append a section after the footer**
+#### Example: Append a section after the footer
 
 ```php
 /**
@@ -123,7 +123,7 @@ Fires inside the `<head>` element of the standalone PWA card template. Use this 
 | --------- | ------- | ----------------------- |
 | `$data`   | `array` | Structured member data. |
 
-**Example: Add Open Graph meta tags**
+#### Example: Add Open Graph meta tags
 
 ```php
 /**
@@ -167,7 +167,7 @@ These hooks fire for special card URL actions. Each receives the `WP_Post` objec
 
 **Note:** These hooks terminate execution with `exit` via their default handlers. If you add your own handler and want to replace the default output entirely, remove the default action first, then output headers and content from your callback and call `exit`.
 
-**Example: Log vCard downloads**
+#### Example: Log vCard downloads
 
 ```php
 /**
@@ -199,7 +199,7 @@ Filters the arguments array passed to `register_post_type()` for the `pikari_tea
 
 **Return:** `array` — The (optionally modified) arguments array.
 
-**Example: Add a custom taxonomy to the team CPT**
+#### Example: Add a custom taxonomy to the team CPT
 
 ```php
 /**
@@ -220,7 +220,7 @@ function my_plugin_team_add_taxonomy_support( array $args ): array {
 add_filter( 'pikari_team_post_type_args', 'my_plugin_team_add_taxonomy_support' );
 ```
 
-**Example: Change the menu position and icon**
+#### Example: Change the menu position and icon
 
 ```php
 /**
@@ -254,7 +254,7 @@ Filters additional CSS to inline into the `<style>` block of the standalone card
 
 **Return:** `string` — The CSS string to inject (may be empty).
 
-**Example: Add per-member accent colour from custom meta**
+#### Example: Add per-member accent colour from custom meta
 
 ```php
 /**
@@ -475,13 +475,13 @@ Outputs the SVG QR code encoding the team member's vCard data. The QR code is ge
 
 The standard WordPress single post view for `pikari_team_member` posts is served by:
 
-```
+```text
 templates/single-pikari_team_member.php
 ```
 
 **To override from a theme**, create the file at:
 
-```
+```text
 {theme}/single-pikari_team_member.php
 ```
 
@@ -493,7 +493,7 @@ WordPress's `locate_template()` is used to discover the override, so child theme
 
 The standalone digital business card page (accessible at `/{url_base}/{slug}/`) is served by:
 
-```
+```text
 templates/card-standalone.php
 ```
 
@@ -501,7 +501,7 @@ This is a complete, self-contained HTML document independent of the active theme
 
 **To override from a theme**, create the file at:
 
-```
+```text
 {theme}/pikari-team/card-standalone.php
 ```
 
