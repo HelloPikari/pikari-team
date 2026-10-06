@@ -19,7 +19,7 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
@@ -80,7 +80,7 @@ jobs:
             --exclude='.git*' \
             --exclude='.github' \
             --exclude='node_modules' \
-            --exclude='src' \
+            --exclude='/src' \
             --exclude='tests' \
             --exclude='.*' \
             --exclude='*.log' \
@@ -105,6 +105,24 @@ jobs:
           if [ ! -d "/tmp/dist/$SLUG/build" ]; then
             echo "Build directory missing from distribution"
             exit 1
+          fi
+
+          # Every path Composer's autoloader points at must ship. An unanchored
+          # exclude once stripped vendor/*/src and fataled every install (1.0.2).
+          if [ -f "/tmp/dist/$SLUG/vendor/autoload.php" ]; then
+            php -r '
+              $c = $argv[1] . "/vendor/composer";
+              $missing = 0;
+              foreach ( require "$c/autoload_psr4.php" as $ns => $dirs ) {
+                foreach ( $dirs as $d ) {
+                  if ( ! is_dir( $d ) ) { echo "Missing autoload dir for $ns: $d\n"; $missing++; }
+                }
+              }
+              foreach ( require "$c/autoload_classmap.php" as $class => $f ) {
+                if ( ! is_file( $f ) ) { echo "Missing class file for $class: $f\n"; $missing++; }
+              }
+              exit( $missing ? 1 : 0 );
+            ' "/tmp/dist/$SLUG"
           fi
 
           cd /tmp/dist
