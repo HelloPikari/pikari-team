@@ -21,6 +21,7 @@ class Template {
         add_filter( 'template_include', [ $this, 'route_template' ] );
         add_filter( 'redirect_canonical', [ $this, 'prevent_file_redirect' ], 10, 2 );
         add_filter( 'single_template', [ $this, 'load_single_template' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_single_assets' ] );
     }
 
     public function register_routes(): void {
@@ -105,6 +106,53 @@ class Template {
         }
 
         return $template;
+    }
+
+    /**
+     * Enqueue the card styles and carousel script on the team member single.
+     *
+     * Uses the same CSS filters as the standalone card so overrides apply in
+     * both views. Themes can wp_dequeue_style( 'pikari-team-card' ) or
+     * wp_dequeue_script( 'pikari-team-carousel' ) to opt out.
+     */
+    public function enqueue_single_assets(): void {
+        if ( ! is_singular( Post_Type::CPT_SLUG ) ) {
+            return;
+        }
+
+        $data         = Template_Tags::get_member_data( get_queried_object_id() );
+        $settings     = get_option( Settings::OPTION_KEY, [] );
+        $brand_color  = $settings['brand_color'] ?? '#0073aa';
+        $default_file = PIKARI_TEAM_DIR . 'assets/css/card.css';
+
+        /** This filter is documented in templates/card-standalone.php */
+        $css_file = apply_filters( 'pikari_team_card_css_file', $default_file, $data );
+
+        $src = false;
+        $css = '';
+        if ( $default_file === $css_file ) {
+            $src = PIKARI_TEAM_URL . 'assets/css/card.css';
+        } elseif ( $css_file && file_exists( $css_file ) ) {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file path from filter.
+            $css = file_get_contents( $css_file );
+        }
+
+        $css .= ':root { --pikari-brand-color: ' . esc_attr( $brand_color ) . '; }';
+
+        /** This filter is documented in templates/card-standalone.php */
+        $css .= apply_filters( 'pikari_team_card_css', '', $data );
+
+        wp_register_style( 'pikari-team-card', $src, [], PIKARI_TEAM_VERSION );
+        wp_add_inline_style( 'pikari-team-card', $css );
+        wp_enqueue_style( 'pikari-team-card' );
+
+        wp_enqueue_script(
+            'pikari-team-carousel',
+            PIKARI_TEAM_URL . 'assets/js/carousel.js',
+            [],
+            PIKARI_TEAM_VERSION,
+            [ 'in_footer' => true ]
+        );
     }
 
     public function route_template( string $template ): string {

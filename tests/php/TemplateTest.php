@@ -156,4 +156,156 @@ class TemplateTest extends TestCase {
 
         $this->assertSame( '/default/template.php', $result );
     }
+
+
+    // -------------------------------------------------------------------------
+    // enqueue_single_assets()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Stub what enqueue_single_assets() needs on a team member single.
+     *
+     * @param array $settings Plugin settings returned by get_option().
+     */
+    private function mock_single_page( array $settings = [ 'brand_color' => '#ff6600' ] ): void {
+        Functions\when( 'is_singular' )->justReturn( true );
+        Functions\when( 'get_queried_object_id' )->justReturn( 7 );
+        Functions\when( 'get_post_meta' )->justReturn( [] );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );
+        Functions\when( 'get_option' )->justReturn( $settings );
+        Functions\when( 'get_post_field' )->justReturn( 'jane-doe' );
+        Functions\when( 'home_url' )->alias(
+            function ( $path ) {
+                return 'https://example.com' . $path;
+            }
+        );
+    }
+
+    public function test_wp_enqueue_scripts_action_is_registered(): void {
+        Actions\expectAdded( 'wp_enqueue_scripts' )->once();
+
+        new Template();
+    }
+
+    public function test_enqueue_single_assets_skips_other_pages(): void {
+        Functions\expect( 'is_singular' )->once()->with( 'pikari_team_member' )->andReturn( false );
+        Functions\expect( 'wp_register_style' )->never();
+        Functions\expect( 'wp_enqueue_style' )->never();
+        Functions\expect( 'wp_enqueue_script' )->never();
+
+        ( new Template() )->enqueue_single_assets();
+    }
+
+    public function test_enqueue_single_assets_enqueues_card_css_on_team_member_single(): void {
+        $this->mock_single_page();
+        Functions\when( 'wp_add_inline_style' )->justReturn( true );
+
+        Functions\expect( 'wp_register_style' )
+            ->once()
+            ->with( 'pikari-team-card', PIKARI_TEAM_URL . 'assets/css/card.css', [], PIKARI_TEAM_VERSION );
+        Functions\expect( 'wp_enqueue_style' )->once()->with( 'pikari-team-card' );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
+
+        ( new Template() )->enqueue_single_assets();
+    }
+
+    public function test_enqueue_single_assets_enqueues_carousel_script_in_footer(): void {
+        $this->mock_single_page();
+        Functions\when( 'wp_register_style' )->justReturn( true );
+        Functions\when( 'wp_add_inline_style' )->justReturn( true );
+        Functions\when( 'wp_enqueue_style' )->justReturn( null );
+
+        Functions\expect( 'wp_enqueue_script' )
+            ->once()
+            ->with(
+                'pikari-team-carousel',
+                PIKARI_TEAM_URL . 'assets/js/carousel.js',
+                [],
+                PIKARI_TEAM_VERSION,
+                [ 'in_footer' => true ]
+            );
+
+        ( new Template() )->enqueue_single_assets();
+    }
+
+    public function test_enqueue_single_assets_adds_brand_color_and_custom_css_inline(): void {
+        $this->mock_single_page( [ 'brand_color' => '#ff6600' ] );
+        Functions\when( 'wp_enqueue_style' )->justReturn( null );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
+        Functions\when( 'wp_register_style' )->justReturn( true );
+
+        Filters\expectApplied( 'pikari_team_card_css' )
+            ->once()
+            ->with( '', \Mockery::type( 'array' ) )
+            ->andReturn( '.pikari-team-card{border:0}' );
+
+        Functions\expect( 'wp_add_inline_style' )
+            ->once()
+            ->with(
+                'pikari-team-card',
+                \Mockery::on(
+                    function ( $css ) {
+                        return str_contains( $css, '--pikari-brand-color: #ff6600;' )
+                            && str_contains( $css, '.pikari-team-card{border:0}' );
+                    }
+                )
+            );
+
+        ( new Template() )->enqueue_single_assets();
+    }
+
+    public function test_enqueue_single_assets_inlines_filtered_css_file(): void {
+        $this->mock_single_page();
+        Functions\when( 'wp_enqueue_style' )->justReturn( null );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
+        $custom_file = tempnam( sys_get_temp_dir(), 'pikari-css' );
+        file_put_contents( $custom_file, '.theme-card{color:red}' );
+
+        Filters\expectApplied( 'pikari_team_card_css_file' )
+            ->once()
+            ->with( PIKARI_TEAM_DIR . 'assets/css/card.css', \Mockery::type( 'array' ) )
+            ->andReturn( $custom_file );
+
+        Functions\expect( 'wp_register_style' )
+            ->once()
+            ->with( 'pikari-team-card', false, [], PIKARI_TEAM_VERSION );
+        Functions\expect( 'wp_add_inline_style' )
+            ->once()
+            ->with(
+                'pikari-team-card',
+                \Mockery::on(
+                    function ( $css ) {
+                        return str_starts_with( $css, '.theme-card{color:red}' );
+                    }
+                )
+            );
+
+        ( new Template() )->enqueue_single_assets();
+
+        unlink( $custom_file );
+    }
+
+    public function test_enqueue_single_assets_skips_file_when_filter_returns_false(): void {
+        $this->mock_single_page();
+        Functions\when( 'wp_enqueue_style' )->justReturn( null );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
+
+        Filters\expectApplied( 'pikari_team_card_css_file' )->once()->andReturn( false );
+
+        Functions\expect( 'wp_register_style' )
+            ->once()
+            ->with( 'pikari-team-card', false, [], PIKARI_TEAM_VERSION );
+        Functions\expect( 'wp_add_inline_style' )
+            ->once()
+            ->with(
+                'pikari-team-card',
+                \Mockery::on(
+                    function ( $css ) {
+                        return str_starts_with( trim( $css ), ':root' );
+                    }
+                )
+            );
+
+        ( new Template() )->enqueue_single_assets();
+    }
 }

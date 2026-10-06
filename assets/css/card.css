@@ -1,6 +1,15 @@
-*,
-*::before,
-*::after {
+/*
+ * Reset scoped to the card. The standalone page keeps its old zero-specificity
+ * reset via :where(); themes are left alone on the single template.
+ */
+:where(body.pikari-team-card-page),
+:where(body.pikari-team-card-page) *,
+:where(body.pikari-team-card-page) *::before,
+:where(body.pikari-team-card-page) *::after,
+.pikari-team-card,
+.pikari-team-card *,
+.pikari-team-card *::before,
+.pikari-team-card *::after {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
@@ -142,6 +151,9 @@ body.pikari-team-card-page {
 	align-items: center;
 	justify-content: center;
 	padding: 1.5rem;
+}
+.pikari-team-card__slide > * {
+	width: 100%;
 }
 .pikari-team-card__carousel-dots {
 	display: flex;
