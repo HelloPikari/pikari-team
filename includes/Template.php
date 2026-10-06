@@ -113,7 +113,8 @@ class Template {
      *
      * Uses the same CSS filters as the standalone card so overrides apply in
      * both views. Themes can wp_dequeue_style( 'pikari-team-card' ) or
-     * wp_dequeue_script( 'pikari-team-carousel' ) to opt out.
+     * wp_dequeue_script( 'pikari-team-carousel' ) on wp_enqueue_scripts at a
+     * priority above 10 to opt out.
      */
     public function enqueue_single_assets(): void {
         if ( ! is_singular( Post_Type::CPT_SLUG ) ) {

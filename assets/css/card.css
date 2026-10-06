@@ -1,15 +1,16 @@
 /*
- * Reset scoped to the card. The standalone page keeps its old zero-specificity
- * reset via :where(); themes are left alone on the single template.
+ * Reset scoped to the card. The standalone page keeps its original
+ * zero-specificity reset. Inside a theme the card reset is 0,1,0 so theme
+ * element margins don't leak in, while BEM rules below still win.
  */
 :where(body.pikari-team-card-page),
 :where(body.pikari-team-card-page) *,
 :where(body.pikari-team-card-page) *::before,
 :where(body.pikari-team-card-page) *::after,
-.pikari-team-card,
-.pikari-team-card *,
-.pikari-team-card *::before,
-.pikari-team-card *::after {
+:where(body:not(.pikari-team-card-page)) .pikari-team-card,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *::before,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *::after {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
