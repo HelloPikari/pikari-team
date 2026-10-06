@@ -1,6 +1,16 @@
-*,
-*::before,
-*::after {
+/*
+ * Reset scoped to the card. The standalone page keeps its original
+ * zero-specificity reset. Inside a theme the card reset is 0,1,0 so theme
+ * element margins don't leak in, while BEM rules below still win.
+ */
+:where(body.pikari-team-card-page),
+:where(body.pikari-team-card-page) *,
+:where(body.pikari-team-card-page) *::before,
+:where(body.pikari-team-card-page) *::after,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *::before,
+:where(body:not(.pikari-team-card-page)) .pikari-team-card *::after {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
@@ -142,6 +152,9 @@ body.pikari-team-card-page {
 	align-items: center;
 	justify-content: center;
 	padding: 1.5rem;
+}
+.pikari-team-card__slide > * {
+	width: 100%;
 }
 .pikari-team-card__carousel-dots {
 	display: flex;
