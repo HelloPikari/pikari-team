@@ -101,4 +101,35 @@ class ShortcodeTest extends TestCase {
 
         Shortcode::render_card( 1 );
     }
+
+
+    public function test_resolve_post_id_prefers_the_block_attribute(): void {
+        $this->assertSame(
+            7,
+            Shortcode::resolve_post_id(
+                [ 'postId' => 7 ],
+                [ 'postId' => 3, 'postType' => 'pikari_team_member' ]
+            )
+        );
+    }
+
+    public function test_resolve_post_id_uses_team_member_context(): void {
+        $this->assertSame(
+            3,
+            Shortcode::resolve_post_id(
+                [ 'postId' => 0 ],
+                [ 'postId' => 3, 'postType' => 'pikari_team_member' ]
+            )
+        );
+    }
+
+    public function test_resolve_post_id_ignores_context_from_other_post_types(): void {
+        $this->assertSame(
+            0,
+            Shortcode::resolve_post_id(
+                [ 'postId' => 0 ],
+                [ 'postId' => 3, 'postType' => 'post' ]
+            )
+        );
+    }
 }

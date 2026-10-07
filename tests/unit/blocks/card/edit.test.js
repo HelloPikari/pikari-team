@@ -100,12 +100,15 @@ describe( 'edit', () => {
 		act( () => root.unmount() );
 	} );
 
-	function renderEdit( postId, { records = MEMBERS, isResolving = false } = {} ) {
+	function renderEdit(
+		postId,
+		{ records = MEMBERS, isResolving = false, view = 'embed' } = {}
+	) {
 		useEntityRecords.mockReturnValue( { records, isResolving } );
 		act( () =>
 			root.render(
 				<Edit
-					attributes={ { postId } }
+					attributes={ { postId, view } }
 					setAttributes={ setAttributes }
 				/>
 			)
@@ -203,5 +206,14 @@ describe( 'edit', () => {
 		clickOption( 'Jane Doe' );
 
 		expect( setAttributes ).toHaveBeenCalledWith( { postId: 7 } );
+	} );
+
+	it( 'shows the current member instead of a picker in the full view', () => {
+		renderEdit( 0, { view: 'full' } );
+
+		expect( instructions() ).toBe(
+			"Shows the current team member's full card."
+		);
+		expect( container.querySelector( '[role="group"]' ) ).toBeNull();
 	} );
 } );

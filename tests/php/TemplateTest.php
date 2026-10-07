@@ -130,6 +130,7 @@ class TemplateTest extends TestCase {
 
     public function test_single_template_loads_plugin_template_for_team_member(): void {
         Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'wp_is_block_theme' )->justReturn( false );
         Functions\when( 'locate_template' )->justReturn( '' );
 
         $template = new Template();
@@ -140,12 +141,48 @@ class TemplateTest extends TestCase {
 
     public function test_single_template_defers_to_theme_template(): void {
         Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'wp_is_block_theme' )->justReturn( false );
         Functions\when( 'locate_template' )->justReturn( '/theme/single-pikari_team_member.php' );
 
         $template = new Template();
         $result   = $template->load_single_template( '/default/template.php' );
 
         $this->assertSame( '/theme/single-pikari_team_member.php', $result );
+    }
+
+    public function test_single_template_leaves_block_themes_to_block_templates(): void {
+        Functions\when( 'get_post_type' )->justReturn( 'pikari_team_member' );
+        Functions\when( 'wp_is_block_theme' )->justReturn( true );
+        Functions\expect( 'locate_template' )->never();
+
+        $template = new Template();
+        $result   = $template->load_single_template( '/wp-includes/template-canvas.php' );
+
+        $this->assertSame( '/wp-includes/template-canvas.php', $result );
+    }
+
+    public function test_register_block_templates_is_hooked_on_init(): void {
+        Actions\expectAdded( 'init' )->with( \Mockery::type( 'array' ) )->twice();
+
+        new Template();
+    }
+
+    public function test_register_block_templates_registers_single_template(): void {
+        Functions\expect( 'register_block_template' )
+            ->once()
+            ->with(
+                'pikari-team//single-pikari_team_member',
+                \Mockery::on(
+                    function ( $args ) {
+                        return [ 'pikari_team_member' ] === $args['post_types']
+                            && str_contains( $args['content'], '<!-- wp:pikari-team/card {"view":"full"} /-->' )
+                            && str_contains( $args['content'], '<!-- wp:post-content' )
+                            && ! empty( $args['title'] );
+                    }
+                )
+            );
+
+        ( new Template() )->register_block_templates();
     }
 
     public function test_single_template_ignores_other_post_types(): void {

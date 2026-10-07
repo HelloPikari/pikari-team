@@ -19,24 +19,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 get_header();
 ?>
 
-<main id="main" class="pikari-team-single">
+<main id="main" class="site-main pikari-team-single">
     <?php
     while ( have_posts() ) :
         the_post();
 
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in Card_Renderer callbacks.
-        echo \Pikari\Team\Card_Renderer::render( get_the_ID(), 'single' );
+        // Card HTML is escaped in the Card_Renderer callbacks.
+        $pikari_team_card = \Pikari\Team\Card_Renderer::render( get_the_ID(), 'single' );
+        ?>
+        <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+            <div class="entry-content">
+        <?php echo $pikari_team_card; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-        // Display post content (biography) if present.
-        $content = get_the_content();
-        if ( $content ) :
-            ?>
-            <div class="pikari-team-single__bio">
+        <?php if ( get_the_content() ) : ?>
+                    <div class="pikari-team-single__bio">
             <?php the_content(); ?>
+                    </div>
+        <?php endif; ?>
             </div>
-            <?php
-        endif;
-
+        </article>
+        <?php
     endwhile;
     ?>
 </main>
