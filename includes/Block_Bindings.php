@@ -33,6 +33,14 @@ class Block_Bindings {
             return '';
         }
 
+        // Only team member fields, and only from members the viewer may see.
+        // Without this a block in any post could print any post's meta.
+        /** This filter is documented in includes/Post_Type.php */
+        $fields = apply_filters( 'pikari_team_meta_fields', Post_Type::META_FIELDS );
+        if ( ! in_array( $key, $fields, true ) || ! Shortcode::can_render( (int) $post_id ) ) {
+            return '';
+        }
+
         return (string) get_post_meta( $post_id, $key, true );
     }
 

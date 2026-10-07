@@ -86,7 +86,7 @@ class Shortcode {
             return false;
         }
 
-        if ( 'publish' !== $post->post_status && ! current_user_can( 'read_post', $post->ID ) ) {
+        if ( ! is_post_publicly_viewable( $post ) && ! current_user_can( 'read_post', $post->ID ) ) {
             return false;
         }
 

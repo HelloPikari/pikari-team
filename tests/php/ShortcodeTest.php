@@ -46,6 +46,7 @@ class ShortcodeTest extends TestCase {
                 'post_status' => $status,
             ]
         );
+        Functions\when( 'is_post_publicly_viewable' )->justReturn( 'publish' === $status );
         Functions\when( 'current_user_can' )->justReturn( $can_read );
         Functions\when( 'post_password_required' )->justReturn( $has_password );
     }
@@ -216,6 +217,19 @@ class ShortcodeTest extends TestCase {
 
     public function test_can_render_allows_a_draft_the_user_can_read(): void {
         $this->mock_post( 'pikari_team_member', 'draft', true );
+
+        $this->assertTrue( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_a_scheduled_member_without_read_capability(): void {
+        $this->mock_post( 'pikari_team_member', 'future' );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_allows_a_custom_public_status(): void {
+        $this->mock_post( 'pikari_team_member', 'archived' );
+        Functions\when( 'is_post_publicly_viewable' )->justReturn( true );
 
         $this->assertTrue( Shortcode::can_render( 42 ) );
     }
