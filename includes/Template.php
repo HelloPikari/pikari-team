@@ -17,6 +17,7 @@ class Template {
 
     public function __construct() {
         add_action( 'init', [ $this, 'register_routes' ] );
+        add_action( 'init', [ $this, 'register_block_templates' ] );
         add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
         add_filter( 'template_include', [ $this, 'route_template' ] );
         add_filter( 'redirect_canonical', [ $this, 'prevent_file_redirect' ], 10, 2 );
@@ -84,6 +85,25 @@ class Template {
     }
 
     /**
+     * Register the plugin's block template for block themes.
+     *
+     * A theme's own single-pikari_team_member.html and Site Editor edits
+     * both take precedence over a plugin-registered template.
+     */
+    public function register_block_templates(): void {
+        register_block_template(
+            'pikari-team//single-pikari_team_member',
+            [
+                'title'       => __( 'Single Team Member', 'pikari-team' ),
+                'description' => __( 'Displays a team member card and biography.', 'pikari-team' ),
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local plugin file.
+                'content'     => (string) file_get_contents( PIKARI_TEAM_DIR . 'templates/single-pikari_team_member.html' ),
+                'post_types'  => [ Post_Type::CPT_SLUG ],
+            ]
+        );
+    }
+
+    /**
      * Load the plugin's single template if the theme doesn't provide one.
      *
      * @param string $template The path to the current template.
@@ -91,6 +111,11 @@ class Template {
      */
     public function load_single_template( string $template ): string {
         if ( Post_Type::CPT_SLUG !== get_post_type() ) {
+            return $template;
+        }
+
+        // Block themes resolve the registered block template instead.
+        if ( wp_is_block_theme() ) {
             return $template;
         }
 

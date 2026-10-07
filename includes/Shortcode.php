@@ -44,6 +44,31 @@ class Shortcode {
         return self::render_card( $post_id );
     }
 
+    /**
+     * Resolve which team member a card block shows.
+     *
+     * The block's own postId wins. The full view falls back to the block
+     * context, but only on a team member, so it never renders a card for an
+     * unrelated host post. An unconfigured embed block still renders nothing.
+     *
+     * @param array $attributes Block attributes.
+     * @param array $context    Block context (postId, postType).
+     * @return int Team member post ID, or 0.
+     */
+    public static function resolve_post_id( array $attributes, array $context ): int {
+        $post_id = (int) ( $attributes['postId'] ?? 0 );
+        if ( $post_id ) {
+            return $post_id;
+        }
+
+        $is_full = 'full' === ( $attributes['view'] ?? 'embed' );
+        if ( $is_full && Post_Type::CPT_SLUG === ( $context['postType'] ?? '' ) ) {
+            return (int) ( $context['postId'] ?? 0 );
+        }
+
+        return 0;
+    }
+
     public static function render_card( int $post_id ): string {
         if ( ! $post_id ) {
             return '';

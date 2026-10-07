@@ -99,7 +99,9 @@ class Card_Renderer {
             echo '<img class="pikari-team-card__headshot" src="' . esc_url( $data['photo_url'] ) . '" alt="' . esc_attr( $data['full_name'] ) . '" width="120" height="120">';
         }
 
-        echo '<h2 class="pikari-team-card__name">' . esc_html( $data['full_name'] ) . '</h2>';
+        // The name is the page heading on the single team member page.
+        $tag = 'single' === $context ? 'h1' : 'h2';
+        echo '<' . $tag . ' class="pikari-team-card__name">' . esc_html( $data['full_name'] ) . '</' . $tag . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fixed tag name.
 
         if ( $data['has_designation'] ) {
             echo '<p class="pikari-team-card__designation">' . esc_html( $data['designation'] ) . '</p>';

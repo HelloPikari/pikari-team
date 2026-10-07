@@ -12,8 +12,14 @@
 		"postId": {
 			"type": "number",
 			"default": 0
+		},
+		"view": {
+			"type": "string",
+			"enum": ["embed", "full"],
+			"default": "embed"
 		}
 	},
+	"usesContext": ["postId", "postType"],
 	"supports": {
 		"html": false,
 		"align": true

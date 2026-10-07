@@ -5,7 +5,7 @@ import { useState, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { postId } = attributes;
+	const { postId, view } = attributes;
 	const [ searchInput, setSearchInput ] = useState( '' );
 	const blockProps = useBlockProps();
 
@@ -36,6 +36,21 @@ export default function Edit( { attributes, setAttributes } ) {
 		const found = teamMembers.find( ( m ) => m.id === postId );
 		return found ? found.title.rendered : '';
 	}, [ postId, teamMembers ] );
+
+	if ( 'full' === view ) {
+		return (
+			<div { ...blockProps }>
+				<Placeholder
+					icon="id-alt"
+					label={ __( 'Team Member Card', 'pikari-team' ) }
+					instructions={ __(
+						"Shows the current team member's full card.",
+						'pikari-team'
+					) }
+				/>
+			</div>
+		);
+	}
 
 	if ( postId ) {
 		return (
