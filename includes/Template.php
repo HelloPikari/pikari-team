@@ -206,6 +206,12 @@ class Template {
         $post   = $posts[0];
         $action = get_query_var( 'pikari_card_action' );
 
+        // An unlocked protected card must not be cached for other visitors.
+        // Core only does this for singular queries, and /card/ isn't one.
+        if ( '' !== $post->post_password ) {
+            nocache_headers();
+        }
+
         if ( 'download' === $action ) {
             do_action( 'pikari_team_card_download', $post );
             exit;
@@ -247,6 +253,15 @@ class Template {
         status_header( 404 );
         nocache_headers();
 
-        return get_404_template() ?: $template;
+        $template_404 = get_404_template();
+        if ( $template_404 ) {
+            return $template_404;
+        }
+
+        // No 404 template: don't let the fallback list the home page's posts.
+        $wp_query->posts      = [];
+        $wp_query->post_count = 0;
+
+        return $template;
     }
 }

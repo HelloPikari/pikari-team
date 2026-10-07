@@ -396,15 +396,41 @@ class TemplateTest extends TestCase {
     }
 
     public function test_route_template_serves_the_card_for_a_published_member(): void {
-        $this->mock_card_request( [ (object) [ 'ID' => 42 ] ] );
+        $this->mock_card_request( [ (object) [ 'ID' => 42, 'post_password' => '' ] ] );
         Functions\when( 'post_password_required' )->justReturn( false );
         Functions\when( 'setup_postdata' )->justReturn( true );
         Functions\when( 'locate_template' )->justReturn( '' );
         Functions\expect( 'status_header' )->never();
+        Functions\expect( 'nocache_headers' )->never();
 
         $this->assertStringEndsWith(
             'templates/card-standalone.php',
             ( new Template() )->route_template( '/index.php' )
         );
+    }
+
+    public function test_route_template_sends_no_cache_headers_for_an_unlocked_protected_card(): void {
+        $this->mock_card_request( [ (object) [ 'ID' => 42, 'post_password' => 'x' ] ] );
+        Functions\when( 'post_password_required' )->justReturn( false );
+        Functions\when( 'setup_postdata' )->justReturn( true );
+        Functions\when( 'locate_template' )->justReturn( '' );
+
+        Functions\expect( 'nocache_headers' )->once();
+
+        ( new Template() )->route_template( '/index.php' );
+    }
+
+    public function test_route_template_404_fallback_drops_the_home_posts(): void {
+        $wp_query = $this->mock_card_request( [] );
+        Functions\when( 'nocache_headers' )->justReturn( null );
+        Functions\when( 'status_header' )->justReturn( null );
+        Functions\when( 'get_404_template' )->justReturn( '' );
+        $wp_query->shouldReceive( 'set_404' )->once();
+        $wp_query->posts      = [ (object) [ 'ID' => 1 ] ];
+        $wp_query->post_count = 1;
+
+        $this->assertSame( '/index.php', ( new Template() )->route_template( '/index.php' ) );
+        $this->assertSame( [], $wp_query->posts );
+        $this->assertSame( 0, $wp_query->post_count );
     }
 }

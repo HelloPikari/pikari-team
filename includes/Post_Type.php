@@ -38,7 +38,7 @@ class Post_Type {
     }
 
     /**
-     * Drop meta from REST responses for password-protected members.
+     * Drop meta and the headshot from REST responses for password-protected members.
      *
      * Core hides a protected post's content but not its meta, which would
      * expose contact details. Users who can edit the member keep the meta so
@@ -53,9 +53,11 @@ class Post_Type {
             return $response;
         }
 
-        $data         = $response->get_data();
-        $data['meta'] = [];
+        $data                   = $response->get_data();
+        $data['meta']           = [];
+        $data['featured_media'] = 0;
         $response->set_data( $data );
+        $response->remove_link( 'https://api.w.org/featuredmedia' );
 
         return $response;
     }

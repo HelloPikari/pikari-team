@@ -155,8 +155,21 @@ class Post_TypeTest extends TestCase {
         Functions\when( 'post_password_required' )->justReturn( true );
         Functions\when( 'current_user_can' )->justReturn( false );
 
-        $response = $this->rest_response( [ 'id' => 42, 'meta' => [ 'pikari_team_phone' => '555' ] ] );
-        $response->shouldReceive( 'set_data' )->once()->with( [ 'id' => 42, 'meta' => [] ] );
+        $response = $this->rest_response(
+            [
+                'id'             => 42,
+                'featured_media' => 9,
+                'meta'           => [ 'pikari_team_phone' => '555' ],
+            ]
+        );
+        $response->shouldReceive( 'set_data' )->once()->with(
+            [
+                'id'             => 42,
+                'featured_media' => 0,
+                'meta'           => [],
+            ]
+        );
+        $response->shouldReceive( 'remove_link' )->once()->with( 'https://api.w.org/featuredmedia' );
 
         ( new Post_Type() )->hide_protected_meta( $response, (object) [ 'ID' => 42 ] );
     }
