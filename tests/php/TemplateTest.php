@@ -345,4 +345,66 @@ class TemplateTest extends TestCase {
 
         ( new Template() )->enqueue_single_assets();
     }
+
+    // -------------------------------------------------------------------------
+    // route_template()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Stub a /card/ request and return the wp_query mock.
+     *
+     * @param array  $posts  get_posts() result.
+     * @param string $action pikari_card_action query var.
+     * @return \Mockery\MockInterface
+     */
+    private function mock_card_request( array $posts, string $action = '' ) {
+        Functions\when( 'get_query_var' )->alias(
+            function ( $var ) use ( $action ) {
+                return 'pikari_card_slug' === $var ? 'jane-doe' : $action;
+            }
+        );
+        Functions\when( 'get_posts' )->justReturn( $posts );
+
+        $wp_query            = \Mockery::mock( 'WP_Query' );
+        $GLOBALS['wp_query'] = $wp_query;
+
+        return $wp_query;
+    }
+
+    public function test_route_template_returns_404_for_a_password_protected_member(): void {
+        $wp_query = $this->mock_card_request( [ (object) [ 'ID' => 42 ] ], 'download' );
+        Functions\when( 'post_password_required' )->justReturn( true );
+        Functions\when( 'nocache_headers' )->justReturn( null );
+        Functions\when( 'get_404_template' )->justReturn( '/theme/404.php' );
+
+        $wp_query->shouldReceive( 'set_404' )->once();
+        Functions\expect( 'status_header' )->once()->with( 404 );
+        Actions\expectDone( 'pikari_team_card_download' )->never();
+
+        $this->assertSame( '/theme/404.php', ( new Template() )->route_template( '/index.php' ) );
+    }
+
+    public function test_route_template_returns_404_for_an_unknown_member(): void {
+        $wp_query = $this->mock_card_request( [] );
+        Functions\when( 'nocache_headers' )->justReturn( null );
+        Functions\when( 'get_404_template' )->justReturn( '/theme/404.php' );
+
+        $wp_query->shouldReceive( 'set_404' )->once();
+        Functions\expect( 'status_header' )->once()->with( 404 );
+
+        $this->assertSame( '/theme/404.php', ( new Template() )->route_template( '/index.php' ) );
+    }
+
+    public function test_route_template_serves_the_card_for_a_published_member(): void {
+        $this->mock_card_request( [ (object) [ 'ID' => 42 ] ] );
+        Functions\when( 'post_password_required' )->justReturn( false );
+        Functions\when( 'setup_postdata' )->justReturn( true );
+        Functions\when( 'locate_template' )->justReturn( '' );
+        Functions\expect( 'status_header' )->never();
+
+        $this->assertStringEndsWith(
+            'templates/card-standalone.php',
+            ( new Template() )->route_template( '/index.php' )
+        );
+    }
 }

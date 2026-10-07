@@ -197,8 +197,10 @@ class Template {
             ]
         );
 
-        if ( empty( $posts ) ) {
-            return $template;
+        // Unknown and password-protected members get a real 404, so neither the
+        // card, the vCard nor the PWA files reveal a protected member's details.
+        if ( empty( $posts ) || post_password_required( $posts[0] ) ) {
+            return $this->not_found( $template );
         }
 
         $post   = $posts[0];
@@ -230,5 +232,21 @@ class Template {
         }
 
         return PIKARI_TEAM_DIR . 'templates/card-standalone.php';
+    }
+
+    /**
+     * Turn the current request into a 404.
+     *
+     * @param string $template Fallback template if the theme has no 404 template.
+     * @return string The 404 template path.
+     */
+    private function not_found( string $template ): string {
+        global $wp_query;
+
+        $wp_query->set_404();
+        status_header( 404 );
+        nocache_headers();
+
+        return get_404_template() ?: $template;
     }
 }

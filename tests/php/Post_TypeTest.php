@@ -127,4 +127,56 @@ class Post_TypeTest extends TestCase {
         $post_type = new Post_Type();
         $post_type->register();
     }
+
+    // -------------------------------------------------------------------------
+    // hide_protected_meta()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Build a REST response mock holding the given data.
+     *
+     * @param array $data Response data.
+     * @return \Mockery\MockInterface
+     */
+    private function rest_response( array $data ) {
+        $response = \Mockery::mock( 'WP_REST_Response' );
+        $response->shouldReceive( 'get_data' )->andReturn( $data );
+
+        return $response;
+    }
+
+    public function test_rest_prepare_filter_is_registered(): void {
+        \Brain\Monkey\Filters\expectAdded( 'rest_prepare_pikari_team_member' )->once();
+
+        new Post_Type();
+    }
+
+    public function test_hide_protected_meta_empties_meta_for_visitors_without_the_password(): void {
+        Functions\when( 'post_password_required' )->justReturn( true );
+        Functions\when( 'current_user_can' )->justReturn( false );
+
+        $response = $this->rest_response( [ 'id' => 42, 'meta' => [ 'pikari_team_phone' => '555' ] ] );
+        $response->shouldReceive( 'set_data' )->once()->with( [ 'id' => 42, 'meta' => [] ] );
+
+        ( new Post_Type() )->hide_protected_meta( $response, (object) [ 'ID' => 42 ] );
+    }
+
+    public function test_hide_protected_meta_keeps_meta_for_editors(): void {
+        Functions\when( 'post_password_required' )->justReturn( true );
+        Functions\when( 'current_user_can' )->justReturn( true );
+
+        $response = $this->rest_response( [ 'meta' => [ 'pikari_team_phone' => '555' ] ] );
+        $response->shouldReceive( 'set_data' )->never();
+
+        ( new Post_Type() )->hide_protected_meta( $response, (object) [ 'ID' => 42 ] );
+    }
+
+    public function test_hide_protected_meta_keeps_meta_for_unprotected_members(): void {
+        Functions\when( 'post_password_required' )->justReturn( false );
+
+        $response = $this->rest_response( [ 'meta' => [ 'pikari_team_phone' => '555' ] ] );
+        $response->shouldReceive( 'set_data' )->never();
+
+        ( new Post_Type() )->hide_protected_meta( $response, (object) [ 'ID' => 42 ] );
+    }
 }
