@@ -34,6 +34,32 @@ class Post_Type {
 
     public function __construct() {
         add_action( 'init', [ $this, 'register' ] );
+        add_filter( 'rest_prepare_' . self::CPT_SLUG, [ $this, 'hide_protected_meta' ], 10, 2 );
+    }
+
+    /**
+     * Drop meta and the headshot from REST responses for password-protected members.
+     *
+     * Core hides a protected post's content but not its meta, which would
+     * expose contact details. Users who can edit the member keep the meta so
+     * the editor still works.
+     *
+     * @param \WP_REST_Response $response REST response.
+     * @param \WP_Post          $post     Team member post.
+     * @return \WP_REST_Response
+     */
+    public function hide_protected_meta( $response, $post ) {
+        if ( ! post_password_required( $post ) || current_user_can( 'edit_post', $post->ID ) ) {
+            return $response;
+        }
+
+        $data                   = $response->get_data();
+        $data['meta']           = [];
+        $data['featured_media'] = 0;
+        $response->set_data( $data );
+        $response->remove_link( 'https://api.w.org/featuredmedia' );
+
+        return $response;
     }
 
     public function register(): void {

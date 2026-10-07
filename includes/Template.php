@@ -197,12 +197,20 @@ class Template {
             ]
         );
 
-        if ( empty( $posts ) ) {
-            return $template;
+        // Unknown and password-protected members get a real 404, so neither the
+        // card, the vCard nor the PWA files reveal a protected member's details.
+        if ( empty( $posts ) || post_password_required( $posts[0] ) ) {
+            return $this->not_found( $template );
         }
 
         $post   = $posts[0];
         $action = get_query_var( 'pikari_card_action' );
+
+        // An unlocked protected card must not be cached for other visitors.
+        // Core only does this for singular queries, and /card/ isn't one.
+        if ( '' !== $post->post_password ) {
+            nocache_headers();
+        }
 
         if ( 'download' === $action ) {
             do_action( 'pikari_team_card_download', $post );
@@ -230,5 +238,30 @@ class Template {
         }
 
         return PIKARI_TEAM_DIR . 'templates/card-standalone.php';
+    }
+
+    /**
+     * Turn the current request into a 404.
+     *
+     * @param string $template Fallback template if the theme has no 404 template.
+     * @return string The 404 template path.
+     */
+    private function not_found( string $template ): string {
+        global $wp_query;
+
+        $wp_query->set_404();
+        status_header( 404 );
+        nocache_headers();
+
+        $template_404 = get_404_template();
+        if ( $template_404 ) {
+            return $template_404;
+        }
+
+        // No 404 template: don't let the fallback list the home page's posts.
+        $wp_query->posts      = [];
+        $wp_query->post_count = 0;
+
+        return $template;
     }
 }
