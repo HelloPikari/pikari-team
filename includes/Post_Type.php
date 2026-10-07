@@ -11,7 +11,7 @@ class Post_Type {
 
     public const CPT_SLUG = 'pikari_team_member';
 
-    private const META_FIELDS = [
+    public const META_FIELDS = [
         'pikari_team_first_name',
         'pikari_team_last_name',
         'pikari_team_designation',
