@@ -25,6 +25,46 @@ class ShortcodeTest extends TestCase {
         }
     }
 
+    /**
+     * Stub get_post() and the access checks for one post.
+     *
+     * @param string $post_type    Post type.
+     * @param string $status       Post status.
+     * @param bool   $can_read     current_user_can( 'read_post' ) result.
+     * @param bool   $has_password post_password_required() result.
+     */
+    private function mock_post(
+        string $post_type = 'pikari_team_member',
+        string $status = 'publish',
+        bool $can_read = false,
+        bool $has_password = false
+    ): void {
+        Functions\when( 'get_post' )->justReturn(
+            (object) [
+                'ID'          => 42,
+                'post_type'   => $post_type,
+                'post_status' => $status,
+            ]
+        );
+        Functions\when( 'current_user_can' )->justReturn( $can_read );
+        Functions\when( 'post_password_required' )->justReturn( $has_password );
+    }
+
+    /**
+     * Stub what Card_Renderer::render() needs to build member data.
+     */
+    private function mock_member_data(): void {
+        Functions\when( 'get_post_meta' )->alias(
+            function ( $id, $key = '', $single = false ) {
+                return '' === $key ? [] : '';
+            }
+        );
+        Functions\when( 'get_option' )->justReturn( [] );
+        Functions\when( 'get_post_field' )->justReturn( 'test' );
+        Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );
+        Functions\when( 'home_url' )->returnArg();
+    }
+
     public function test_add_shortcode_is_called(): void {
         Functions\expect( 'add_shortcode' )
             ->once()
@@ -34,6 +74,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_shortcode_resolves_slug_to_post_id(): void {
+        $this->mock_post();
         Functions\when( 'add_shortcode' )->justReturn( null );
         Functions\when( 'get_post_meta' )->alias(
             function ( $id, $key = '', $single = false ) {
@@ -59,6 +100,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_shortcode_uses_id_attribute_directly(): void {
+        $this->mock_post();
         Functions\when( 'add_shortcode' )->justReturn( null );
         Functions\when( 'get_post_meta' )->alias(
             function ( $id, $key = '', $single = false ) {
@@ -84,6 +126,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_render_card_fires_embed_hooks(): void {
+        $this->mock_post();
         Functions\when( 'get_post_meta' )->alias(
             function ( $id, $key = '', $single = false ) {
                 return '' === $key ? [] : '';
@@ -141,5 +184,117 @@ class ShortcodeTest extends TestCase {
                 [ 'postId' => 3, 'postType' => 'pikari_team_member' ]
             )
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // can_render()
+    // -------------------------------------------------------------------------
+
+    public function test_can_render_allows_a_published_member(): void {
+        $this->mock_post();
+
+        $this->assertTrue( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_a_missing_post(): void {
+        Functions\when( 'get_post' )->justReturn( null );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_another_post_type(): void {
+        $this->mock_post( 'post' );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_a_draft_without_read_capability(): void {
+        $this->mock_post( 'pikari_team_member', 'draft' );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_allows_a_draft_the_user_can_read(): void {
+        $this->mock_post( 'pikari_team_member', 'draft', true );
+
+        $this->assertTrue( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_a_private_member_without_read_capability(): void {
+        $this->mock_post( 'pikari_team_member', 'private' );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_trash_even_when_readable(): void {
+        $this->mock_post( 'pikari_team_member', 'trash', true );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    public function test_can_render_rejects_a_password_protected_member(): void {
+        $this->mock_post( 'pikari_team_member', 'publish', false, true );
+
+        $this->assertFalse( Shortcode::can_render( 42 ) );
+    }
+
+    // -------------------------------------------------------------------------
+    // Entry points: shortcode id=, block embed (render_card), block full
+    // -------------------------------------------------------------------------
+
+    public function test_shortcode_id_renders_nothing_for_a_draft(): void {
+        Functions\when( 'add_shortcode' )->justReturn( null );
+        $this->mock_post( 'pikari_team_member', 'draft' );
+
+        $this->assertSame( '', ( new Shortcode() )->shortcode_handler( [ 'id' => '42' ] ) );
+    }
+
+    public function test_shortcode_id_renders_a_published_member(): void {
+        Functions\when( 'add_shortcode' )->justReturn( null );
+        $this->mock_post();
+        $this->mock_member_data();
+
+        $this->assertStringContainsString(
+            'pikari-team-card',
+            ( new Shortcode() )->shortcode_handler( [ 'id' => '42' ] )
+        );
+    }
+
+    public function test_render_card_renders_nothing_for_another_post_type(): void {
+        $this->mock_post( 'page' );
+
+        $this->assertSame( '', Shortcode::render_card( 42 ) );
+    }
+
+    public function test_render_card_renders_a_published_member(): void {
+        $this->mock_post();
+        $this->mock_member_data();
+
+        $this->assertStringContainsString( 'pikari-team-card', Shortcode::render_card( 42 ) );
+    }
+
+    public function test_render_full_card_renders_nothing_for_a_private_member(): void {
+        $this->mock_post( 'pikari_team_member', 'private' );
+
+        $this->assertSame( '', Shortcode::render_full_card( 42 ) );
+    }
+
+    public function test_render_full_card_renders_nothing_for_a_password_protected_member(): void {
+        $this->mock_post( 'pikari_team_member', 'publish', false, true );
+
+        $this->assertSame( '', Shortcode::render_full_card( 42 ) );
+    }
+
+    public function test_render_full_card_renders_nothing_without_a_post_id(): void {
+        $this->assertSame( '', Shortcode::render_full_card( 0 ) );
+    }
+
+    public function test_render_full_card_renders_the_single_card_for_a_published_member(): void {
+        $this->mock_post();
+        $this->mock_member_data();
+
+        Actions\expectDone( 'pikari_team_card_carousel' )->once();
+
+        $this->assertStringContainsString( 'pikari-team-card', Shortcode::render_full_card( 42 ) );
     }
 }

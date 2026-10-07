@@ -69,11 +69,49 @@ class Shortcode {
         return 0;
     }
 
+    /**
+     * Whether a card may be shown for this post.
+     *
+     * Every card entry point (shortcode, block embed, block full view) runs
+     * through this, so a block or shortcode can't expose an unpublished,
+     * protected or non-member post. Users who can read the post, such as an
+     * editor previewing a draft, still see it. Trash never renders.
+     *
+     * @param int $post_id Post ID.
+     * @return bool True when the card can be rendered.
+     */
+    public static function can_render( int $post_id ): bool {
+        $post = $post_id ? get_post( $post_id ) : null;
+        if ( ! $post || Post_Type::CPT_SLUG !== $post->post_type || 'trash' === $post->post_status ) {
+            return false;
+        }
+
+        if ( 'publish' !== $post->post_status && ! current_user_can( 'read_post', $post->ID ) ) {
+            return false;
+        }
+
+        return ! post_password_required( $post );
+    }
+
     public static function render_card( int $post_id ): string {
-        if ( ! $post_id ) {
+        if ( ! self::can_render( $post_id ) ) {
             return '';
         }
 
         return Card_Renderer::render( $post_id, 'shortcode' );
+    }
+
+    /**
+     * Render the full single-page card, used by the card block's full view.
+     *
+     * @param int $post_id Team member post ID.
+     * @return string Card HTML, or an empty string.
+     */
+    public static function render_full_card( int $post_id ): string {
+        if ( ! self::can_render( $post_id ) ) {
+            return '';
+        }
+
+        return Card_Renderer::render( $post_id, 'single' );
     }
 }
