@@ -117,7 +117,7 @@ class ShortcodeTest extends TestCase {
         $this->assertSame(
             3,
             Shortcode::resolve_post_id(
-                [ 'postId' => 0 ],
+                [ 'postId' => 0, 'view' => 'full' ],
                 [ 'postId' => 3, 'postType' => 'pikari_team_member' ]
             )
         );
@@ -127,8 +127,18 @@ class ShortcodeTest extends TestCase {
         $this->assertSame(
             0,
             Shortcode::resolve_post_id(
-                [ 'postId' => 0 ],
+                [ 'postId' => 0, 'view' => 'full' ],
                 [ 'postId' => 3, 'postType' => 'post' ]
+            )
+        );
+    }
+
+    public function test_resolve_post_id_ignores_context_for_embed_view(): void {
+        $this->assertSame(
+            0,
+            Shortcode::resolve_post_id(
+                [ 'postId' => 0 ],
+                [ 'postId' => 3, 'postType' => 'pikari_team_member' ]
             )
         );
     }

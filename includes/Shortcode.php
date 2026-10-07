@@ -47,9 +47,9 @@ class Shortcode {
     /**
      * Resolve which team member a card block shows.
      *
-     * The block's own postId wins. Otherwise fall back to the block context,
-     * but only on a team member, so an unconfigured block in a regular post
-     * renders nothing rather than a card for the host post.
+     * The block's own postId wins. The full view falls back to the block
+     * context, but only on a team member, so it never renders a card for an
+     * unrelated host post. An unconfigured embed block still renders nothing.
      *
      * @param array $attributes Block attributes.
      * @param array $context    Block context (postId, postType).
@@ -61,7 +61,8 @@ class Shortcode {
             return $post_id;
         }
 
-        if ( Post_Type::CPT_SLUG === ( $context['postType'] ?? '' ) ) {
+        $is_full = 'full' === ( $attributes['view'] ?? 'embed' );
+        if ( $is_full && Post_Type::CPT_SLUG === ( $context['postType'] ?? '' ) ) {
             return (int) ( $context['postId'] ?? 0 );
         }
 

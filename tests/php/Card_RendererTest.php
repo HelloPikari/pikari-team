@@ -103,4 +103,27 @@ class Card_RendererTest extends TestCase {
             'single'
         );
     }
+
+    public function test_render_header_uses_h1_for_the_single_page(): void {
+        $this->mock_member_data();
+
+        ob_start();
+        Card_Renderer::render_header( \Pikari\Team\Template_Tags::get_member_data( 1 ), 'single' );
+        $html = (string) ob_get_clean();
+
+        $this->assertStringContainsString( '<h1 class="pikari-team-card__name">', $html );
+    }
+
+    public function test_render_header_uses_h2_outside_the_single_page(): void {
+        $this->mock_member_data();
+        $data = \Pikari\Team\Template_Tags::get_member_data( 1 );
+
+        foreach ( [ 'standalone', 'embed', 'shortcode' ] as $context ) {
+            ob_start();
+            Card_Renderer::render_header( $data, $context );
+            $html = (string) ob_get_clean();
+
+            $this->assertStringContainsString( '<h2 class="pikari-team-card__name">', $html, $context );
+        }
+    }
 }
