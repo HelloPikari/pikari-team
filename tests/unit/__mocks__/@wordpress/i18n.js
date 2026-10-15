@@ -1,5 +1,5 @@
 /**
- * Mock for @wordpress/i18n.
+ * Mock for `@wordpress/i18n`.
  *
  * Returns the input string as-is (passthrough) for testing purposes.
  */

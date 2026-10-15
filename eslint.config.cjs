@@ -1,5 +1,5 @@
 /**
- * ESLint flat config extending @wordpress/eslint-plugin.
+ * ESLint flat config extending `@wordpress/eslint-plugin`.
  *
  * Synced to all plugins via config-templates. Do not edit in plugin directories —
  * changes should be made in .github/config-templates/plugin/eslint.config.cjs and synced.
@@ -79,6 +79,12 @@ module.exports = [
 		files: [ 'tests/unit/**/*.js' ],
 	} ) ),
 	{
+		files: [ 'tests/unit/**/*.js' ],
+		rules: {
+			'vitest/no-conditional-expect': 'off',
+		},
+	},
+	{
 		files: [ 'tests/**/*.js' ],
 		languageOptions: {
 			globals: {
@@ -91,9 +97,12 @@ module.exports = [
 		},
 	},
 	{
-		files: [ 'webpack.config.js' ],
+		files: [ 'webpack.config.js', 'eslint.config.cjs', 'vitest.config.mjs' ],
 		languageOptions: {
 			globals: globals.node,
+		},
+		rules: {
+			'import/no-extraneous-dependencies': 'off',
 		},
 	},
 ];
