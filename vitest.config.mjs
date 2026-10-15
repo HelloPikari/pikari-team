@@ -66,6 +66,8 @@ export default defineConfig( {
 	},
 	test: {
 		environment: 'jsdom',
+		// Jest's jsdom URL. Vitest defaults to http://localhost:3000.
+		environmentOptions: { jsdom: { url: 'http://localhost/' } },
 		globals: true,
 		include: [ 'tests/unit/**/*.test.js' ],
 		setupFiles: [ './tests/unit/setup.js' ],
