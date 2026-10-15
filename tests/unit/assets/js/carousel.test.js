@@ -46,10 +46,9 @@ class FakeIntersectionObserver {
 	}
 }
 
-function loadCarousel() {
-	jest.isolateModules( () => {
-		require( '../../../../assets/js/carousel.js' );
-	} );
+async function loadCarousel() {
+	vi.resetModules();
+	await import( '../../../../assets/js/carousel.js' );
 }
 
 describe( 'carousel', () => {
@@ -73,23 +72,23 @@ describe( 'carousel', () => {
 		dots = document.querySelectorAll( '.pikari-team-card__dot' );
 	}
 
-	it( 'does nothing on a card without a carousel', () => {
-		expect( loadCarousel ).not.toThrow();
+	it( 'does nothing on a card without a carousel', async () => {
+		await expect( loadCarousel() ).resolves.toBeUndefined();
 		expect( observers ).toHaveLength( 0 );
 	} );
 
-	it( 'does not set up a carousel with a single slide', () => {
+	it( 'does not set up a carousel with a single slide', async () => {
 		renderCarousel( ONE_SLIDE_MARKUP );
 
-		loadCarousel();
+		await loadCarousel();
 
 		expect( observers ).toHaveLength( 0 );
 	} );
 
-	it( 'watches every slide against the track', () => {
+	it( 'watches every slide against the track', async () => {
 		renderCarousel( TWO_SLIDE_MARKUP );
 
-		loadCarousel();
+		await loadCarousel();
 
 		expect( observers ).toHaveLength( 1 );
 		expect( observers[ 0 ].options ).toEqual( {
@@ -99,9 +98,9 @@ describe( 'carousel', () => {
 		expect( observers[ 0 ].observed ).toEqual( [ slides[ 0 ], slides[ 1 ] ] );
 	} );
 
-	it( 'selects the dot for the slide that scrolls into view', () => {
+	it( 'selects the dot for the slide that scrolls into view', async () => {
 		renderCarousel( TWO_SLIDE_MARKUP );
-		loadCarousel();
+		await loadCarousel();
 
 		observers[ 0 ].callback( [
 			{ isIntersecting: true, target: slides[ 1 ] },
@@ -113,9 +112,9 @@ describe( 'carousel', () => {
 		expect( dots[ 1 ].getAttribute( 'aria-selected' ) ).toBe( 'true' );
 	} );
 
-	it( 'leaves the selection alone when a slide scrolls out of view', () => {
+	it( 'leaves the selection alone when a slide scrolls out of view', async () => {
 		renderCarousel( TWO_SLIDE_MARKUP );
-		loadCarousel();
+		await loadCarousel();
 
 		observers[ 0 ].callback( [
 			{ isIntersecting: false, target: slides[ 1 ] },
@@ -127,13 +126,13 @@ describe( 'carousel', () => {
 		expect( dots[ 1 ].getAttribute( 'aria-selected' ) ).toBe( 'false' );
 	} );
 
-	it( 'scrolls the track to the slide for a clicked dot', () => {
+	it( 'scrolls the track to the slide for a clicked dot', async () => {
 		renderCarousel( TWO_SLIDE_MARKUP );
 		// jsdom does no layout, so give the track and slide real offsets.
 		Object.defineProperty( track, 'offsetLeft', { value: 20 } );
 		Object.defineProperty( slides[ 1 ], 'offsetLeft', { value: 320 } );
-		track.scrollTo = jest.fn();
-		loadCarousel();
+		track.scrollTo = vi.fn();
+		await loadCarousel();
 
 		dots[ 1 ].click();
 

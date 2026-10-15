@@ -9,10 +9,9 @@
 
 const SW_URL = '/card/jane-doe/service-worker';
 
-function loadSwRegister() {
-	jest.isolateModules( () => {
-		require( '../../../../assets/js/sw-register.js' );
-	} );
+async function loadSwRegister() {
+	vi.resetModules();
+	await import( '../../../../assets/js/sw-register.js' );
 }
 
 function flushPromises() {
@@ -24,11 +23,11 @@ describe( 'sw-register', () => {
 	let activeWorker;
 
 	beforeEach( () => {
-		activeWorker = { postMessage: jest.fn() };
+		activeWorker = { postMessage: vi.fn() };
 		serviceWorker = {
 			// On a first visit the new worker is still installing, so the
 			// registration has no active worker until `ready` resolves.
-			register: jest.fn().mockResolvedValue( { active: null } ),
+			register: vi.fn().mockResolvedValue( { active: null } ),
 			ready: Promise.resolve( { active: activeWorker } ),
 		};
 		Object.defineProperty( window.navigator, 'serviceWorker', {
@@ -40,18 +39,19 @@ describe( 'sw-register', () => {
 	} );
 
 	afterEach( () => {
+		vi.restoreAllMocks();
 		delete window.navigator.serviceWorker;
 		delete window.pikariSwUrl;
 	} );
 
-	it( "registers the card's service worker", () => {
-		loadSwRegister();
+	it( "registers the card's service worker", async () => {
+		await loadSwRegister();
 
 		expect( serviceWorker.register ).toHaveBeenCalledWith( SW_URL );
 	} );
 
 	it( 'asks the ready worker to cache the current card page', async () => {
-		loadSwRegister();
+		await loadSwRegister();
 		await flushPromises();
 
 		expect( activeWorker.postMessage ).toHaveBeenCalledWith( {
@@ -60,27 +60,33 @@ describe( 'sw-register', () => {
 		} );
 	} );
 
-	it( 'does not register without a service worker URL', () => {
+	it( 'does not register without a service worker URL', async () => {
 		delete window.pikariSwUrl;
 
-		expect( loadSwRegister ).not.toThrow();
+		await expect( loadSwRegister() ).resolves.toBeUndefined();
 		expect( serviceWorker.register ).not.toHaveBeenCalled();
 	} );
 
-	it( 'does nothing in browsers without service worker support', () => {
+	it( 'does nothing in browsers without service worker support', async () => {
 		delete window.navigator.serviceWorker;
 
-		expect( loadSwRegister ).not.toThrow();
+		await expect( loadSwRegister() ).resolves.toBeUndefined();
 	} );
 
 	it( 'logs a failed registration instead of rejecting', async () => {
+		const consoleError = vi
+			.spyOn( console, 'error' )
+			.mockImplementation( () => {} );
 		const error = new Error( 'Registration blocked' );
 		serviceWorker.register.mockRejectedValue( error );
 
-		loadSwRegister();
+		await loadSwRegister();
 		await flushPromises();
 
-		expect( console ).toHaveErroredWith( 'SW registration failed:', error );
+		expect( consoleError ).toHaveBeenCalledWith(
+			'SW registration failed:',
+			error
+		);
 		expect( activeWorker.postMessage ).not.toHaveBeenCalled();
 	} );
 } );

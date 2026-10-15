@@ -86,10 +86,10 @@ vendor/bin/phpunit --testdox                       # Verbose, human-readable out
 vendor/bin/phpunit tests/php/SomeClassTest.php     # Single file
 vendor/bin/phpunit --filter test_some_method        # Single test method
 
-# JavaScript unit tests (Jest)
+# JavaScript unit tests (Vitest)
 npm test                                           # Run all JS tests
-npm test -- --testPathPattern=sidebar-panel        # Single file by pattern
-npm test -- --testNamePattern="should persist"     # Single test by name
+npm test -- sidebar-panel                          # Single file by path filter
+npm test -- -t "renders nothing"                   # Single test by name
 npm test -- --watch                                # Watch mode for development
 ```
 

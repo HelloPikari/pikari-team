@@ -1,7 +1,7 @@
 /**
  * Tests for the team member sidebar panel.
  *
- * The @wordpress/* editor packages are WordPress externals and aren't
+ * The `@wordpress/*` editor packages are WordPress externals and aren't
  * installed, so they're replaced with minimal stand-ins: panels render as
  * sections, controls as native inputs, and the post's meta comes from a
  * mocked useEntityProp.
@@ -16,24 +16,19 @@ import '../../../src/editor/sidebar-panel';
 
 let mockPostType;
 
-jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ), {
-	virtual: true,
-} );
+vi.mock( '@wordpress/plugins', () => ( { registerPlugin: vi.fn() } ) );
 
-jest.mock(
+vi.mock(
 	'@wordpress/data',
 	() => ( {
 		useSelect: ( selector ) =>
 			selector( () => ( { getCurrentPostType: () => mockPostType } ) ),
-	} ),
-	{ virtual: true }
+	} )
 );
 
-jest.mock( '@wordpress/core-data', () => ( { useEntityProp: jest.fn() } ), {
-	virtual: true,
-} );
+vi.mock( '@wordpress/core-data', () => ( { useEntityProp: vi.fn() } ) );
 
-jest.mock(
+vi.mock(
 	'@wordpress/editor',
 	() => {
 		const { createElement } = require( 'react' );
@@ -46,11 +41,10 @@ jest.mock(
 					children
 				),
 		};
-	},
-	{ virtual: true }
+	}
 );
 
-jest.mock(
+vi.mock(
 	'@wordpress/components',
 	() => {
 		const { createElement } = require( 'react' );
@@ -78,8 +72,7 @@ jest.mock(
 					)
 				),
 		};
-	},
-	{ virtual: true }
+	}
 );
 
 const TeamMemberSidebar = registerPlugin.mock.calls[ 0 ][ 1 ].render;
@@ -104,7 +97,7 @@ describe( 'sidebar-panel', () => {
 	beforeEach( () => {
 		global.IS_REACT_ACT_ENVIRONMENT = true;
 		mockPostType = 'pikari_team_member';
-		setMeta = jest.fn();
+		setMeta = vi.fn();
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 		root = createRoot( container );

@@ -1,7 +1,7 @@
 /**
  * Tests for the Team Member Card block's editor UI.
  *
- * The @wordpress/* editor packages are WordPress externals and aren't
+ * The `@wordpress/*` editor packages are WordPress externals and aren't
  * installed, so they're replaced with minimal stand-ins. The combobox becomes
  * a search box plus one button per option, and team members come from a
  * mocked useEntityRecords.
@@ -13,19 +13,17 @@ import { useEntityRecords } from '@wordpress/core-data';
 
 import Edit from '../../../../src/blocks/card/edit';
 
-jest.mock(
+vi.mock(
 	'@wordpress/block-editor',
-	() => ( { useBlockProps: () => ( {} ) } ),
-	{ virtual: true }
+	() => ( { useBlockProps: () => ( {} ) } )
 );
 
-jest.mock(
+vi.mock(
 	'@wordpress/core-data',
-	() => ( { useEntityRecords: jest.fn() } ),
-	{ virtual: true }
+	() => ( { useEntityRecords: vi.fn() } )
 );
 
-jest.mock(
+vi.mock(
 	'@wordpress/components',
 	() => {
 		const { createElement } = require( 'react' );
@@ -61,8 +59,7 @@ jest.mock(
 					)
 				),
 		};
-	},
-	{ virtual: true }
+	}
 );
 
 // Shaped like a `_fields: 'id,title'` response in the edit context.
@@ -90,7 +87,7 @@ describe( 'edit', () => {
 
 	beforeEach( () => {
 		global.IS_REACT_ACT_ENVIRONMENT = true;
-		setAttributes = jest.fn();
+		setAttributes = vi.fn();
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 		root = createRoot( container );
