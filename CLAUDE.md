@@ -167,7 +167,6 @@ class Post_TypeTest extends TestCase {
 
 - **Local only.** CI does not run e2e. The visual baselines in `tests/e2e/specs/__snapshots__/` were rendered on macOS and will not pixel-match Linux.
 - **Every Playwright bump regenerates the baselines:** `npm run test:e2e -- visual.spec.js --update-snapshots`, then open the PNGs before committing them.
-- **Mutation-checking PHP against wp-env:** opcache can keep serving the mutated code after you restore a file with an older mtime. `touch` the file after restoring it, and wait 2s or more before the next request.
 
 ### Test Infrastructure
 

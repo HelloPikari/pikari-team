@@ -62,6 +62,21 @@ test( 'full view shows the QR code, contact slide and Save Contact', async ( {
 	).toHaveAttribute( 'href', /\/card\/ada-lovelace\/download\.vcf$/ );
 } );
 
+test( 'an ordinary page loads the card styles, and the carousel only for the full view', async ( {
+	page,
+} ) => {
+	await page.goto( pagePath( PAGES.embed ) );
+	await expect( page.locator( '#pikari-team-card-css' ) ).toHaveCount( 1 );
+	await expect( page.locator( '#pikari-team-carousel-js' ) ).toHaveCount( 0 );
+
+	await page.goto( pagePath( PAGES.full ) );
+	await expect( page.locator( '#pikari-team-card-css' ) ).toHaveCount( 1 );
+	await expect( page.locator( '#pikari-team-carousel-js' ) ).toHaveCount( 1 );
+
+	await page.goto( pagePath( PAGES.hidden ) );
+	await expect( page.locator( '#pikari-team-card-css' ) ).toHaveCount( 0 );
+} );
+
 test( 'protected and draft members render no card', async ( { page } ) => {
 	await page.goto( pagePath( PAGES.hidden ) );
 

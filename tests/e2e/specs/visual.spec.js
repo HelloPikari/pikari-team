@@ -1,7 +1,7 @@
 /**
- * Visual baselines: the card on the single member page, at desktop and
- * mobile widths. The standalone /card/ page and the card block on an ordinary
- * page are fixme until their styling gaps are decided (see below).
+ * Visual baselines: the card on the single member page, the standalone /card/
+ * page, and the card block's embed and full views on an ordinary page, at
+ * desktop and mobile widths.
  *
  * Baselines are `<name>-chromium.png` under `__snapshots__/`, generated on
  * macOS / Chromium and committed. Playwright does not run on CI, so nothing
@@ -40,11 +40,7 @@ for ( const [ name, viewport ] of Object.entries( VIEWPORTS ) ) {
 			);
 		} );
 
-		// The standalone card's contact section is unstyled: Card_Renderer
-		// outputs `__contact-link`, but card.css only styles `__link` (the
-		// carousel slide's class), so the links run together. A baseline now
-		// would lock that in. Waiting on Steve's decision; see the PR.
-		test.fixme( 'standalone card', async ( { page } ) => {
+		test( 'standalone card', async ( { page } ) => {
 			await page.goto( cardPath( ADA ) );
 
 			await expect( page ).toHaveScreenshot( `standalone-${ name }.png`, {
@@ -53,16 +49,11 @@ for ( const [ name, viewport ] of Object.entries( VIEWPORTS ) ) {
 			} );
 		} );
 
-		// card.css and carousel.js only load on the single member page, so a
-		// card placed on an ordinary page renders unstyled. A baseline now
-		// would lock that in. Waiting on Steve's decision; see the PR.
-		// Fixing the enqueue alone won't do: the embed's contact section has
-		// the same `__contact-link` class gap as the standalone card.
 		for ( const [ view, pageFixture ] of [
 			[ 'embed', PAGES.embed ],
 			[ 'full', PAGES.full ],
 		] ) {
-			test.fixme( `card block, ${ view } view`, async ( { page } ) => {
+			test( `card block, ${ view } view`, async ( { page } ) => {
 				await page.goto( pagePath( pageFixture ) );
 
 				await expect( page.locator( CARD ).first() ).toHaveScreenshot(
