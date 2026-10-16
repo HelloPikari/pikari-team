@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 Team member CPT with digital business cards, PWA-enabled card pages, vCard QR codes, and customizable card templates
 
-## Required Agents
+## Required Reviews
 
-Always use these agents proactively:
+Get these reviews proactively, from a dedicated agent if one exists, otherwise from a general agent briefed for the role:
 
-- **`wordpress-core-expert`** — Review all PHP and JavaScript code changes
-- **`accessibility-expert`** — Review interactive UI components, keyboard navigation, focus management, ARIA attributes
+- **WordPress core** — all PHP and JavaScript changes
+- **Accessibility** — interactive UI, keyboard navigation, focus management, ARIA
 
 ## Architecture
 
