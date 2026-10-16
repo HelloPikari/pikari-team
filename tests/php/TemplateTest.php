@@ -207,6 +207,9 @@ class TemplateTest extends TestCase {
     private function mock_single_page( array $settings = [ 'brand_color' => '#ff6600' ] ): void {
         Functions\when( 'is_singular' )->justReturn( true );
         Functions\when( 'get_queried_object_id' )->justReturn( 7 );
+        Functions\when( 'wp_style_is' )->justReturn( false );
+        Functions\when( 'wp_script_is' )->justReturn( false );
+        Functions\when( 'did_action' )->justReturn( 1 );
         Functions\when( 'get_post_meta' )->justReturn( [] );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );
         Functions\when( 'get_option' )->justReturn( $settings );
@@ -432,5 +435,28 @@ class TemplateTest extends TestCase {
         $this->assertSame( '/index.php', ( new Template() )->route_template( '/index.php' ) );
         $this->assertSame( [], $wp_query->posts );
         $this->assertSame( 0, $wp_query->post_count );
+    }
+
+    public function test_enqueue_card_assets_does_nothing_once_the_assets_are_registered(): void {
+        // Covers a second card on the page, and a theme that dequeued the
+        // assets as documented: neither may re-enqueue or re-add inline CSS.
+        $this->mock_single_page();
+        Functions\when( 'wp_style_is' )->alias(
+            function ( $handle, $status ) {
+                return 'registered' === $status;
+            }
+        );
+        Functions\when( 'wp_script_is' )->alias(
+            function ( $handle, $status ) {
+                return 'registered' === $status;
+            }
+        );
+
+        Functions\expect( 'wp_register_style' )->never();
+        Functions\expect( 'wp_add_inline_style' )->never();
+        Functions\expect( 'wp_enqueue_style' )->never();
+        Functions\expect( 'wp_enqueue_script' )->never();
+
+        Template::enqueue_card_assets( 7, true );
     }
 }

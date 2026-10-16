@@ -16,8 +16,9 @@
 	padding: 0;
 }
 body.pikari-team-card-page {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-		Ubuntu, Cantarell, sans-serif;
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+		Cantarell, sans-serif;
 	background: #f5f5f5;
 	color: #333;
 	line-height: 1.5;
@@ -70,7 +71,8 @@ body.pikari-team-card-page {
 .pikari-team-card__contact {
 	padding: 1rem 1.5rem;
 }
-.pikari-team-card__link {
+.pikari-team-card__link,
+.pikari-team-card__contact-link {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -79,12 +81,22 @@ body.pikari-team-card-page {
 	color: inherit;
 	text-decoration: none;
 }
-.pikari-team-card__link:last-child {
+.pikari-team-card__link:last-child,
+.pikari-team-card__contact-link:last-child {
 	border-bottom: none;
 }
 .pikari-team-card__link:hover,
-.pikari-team-card__link:focus {
+.pikari-team-card__link:focus,
+.pikari-team-card__contact-link:hover,
+.pikari-team-card__contact-link:focus {
 	color: var(--pikari-brand-color, #0073aa);
+}
+/* The address is its own section on /card/; inside a carousel slide it isn't a direct child. */
+.pikari-team-card > .pikari-team-card__address {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 1.5rem 1rem;
 }
 .pikari-team-card__label {
 	font-size: 0.75rem;
