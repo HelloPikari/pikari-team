@@ -1,6 +1,6 @@
 # Pikari Team — Roadmap
 
-Last updated: 2026-10-09
+Last updated: 2026-10-16
 
 Started 2026-09-16. Anything earlier is in `_log/2026-04-07.md` and the git history. Carried-over items were checked against the code when this file was created, except where noted.
 
@@ -9,6 +9,8 @@ Started 2026-09-16. Anything earlier is in `_log/2026-04-07.md` and the git hist
 - ~~Hotfix the release ZIP missing `vendor/*/src`~~ — ✅ DONE (2026-10-06). 1.0.2 shipped 0 `php-qrcode/src` files and every OSC `/team-member/` page returned 500; 1.0.3 ships 68. The unanchored `--exclude='src'` had come back via the #24 template sync. The build now fails if any Composer autoload path is missing. See #46.
 - ~~1.0.4 published and installed on OSC~~ — ✅ DONE (2026-10-07). Contains #42–#44, #48 and #49.
 - ~~1.0.5 published~~ — ✅ DONE (2026-10-07). Two security fixes, #50 and #52 (see Security). OSC update pending (todo #688).
+- ~~1.0.6 published~~ — ✅ DONE (2026-10-16). Tooling only: the scripts-36/Vitest migration (#55) plus a php-stubs bump (#54). Bump PR #56 merged itself; the package index lists 1.0.6. No runtime change, so OSC doesn't need it.
+- The release-drafter notes list a PR once per label, and #55 appeared 3 times (docs, chore, dependencies; the autolabeler adds labels from the files a PR touches). The install snippet also shows a bare `composer require`, which can't work without the package-index repository entry. Both come from the shared template; cosmetic, so not raised with the monorepo yet.
 
 ## Security
 
@@ -23,7 +25,8 @@ Started 2026-09-16. Anything earlier is in `_log/2026-04-07.md` and the git hist
 
 - ~~JS unit tests for the v1 card-page scripts~~ — ✅ DONE (2026-09-16). `carousel.js` and `sw-register.js`, 11 tests; all 18 deliberate breaks caught. See #39.
 - ~~JS unit tests for the block editor files~~ — ✅ DONE (2026-09-16). `sidebar-panel.js` and `blocks/card/edit.js`, 32 tests; 20 of 21 breaks caught, and the one miss can't be observed by any test. JS suite now 43. See #40.
-- Coverage reports skip `assets/js/**`: `collectCoverageFrom` only includes `src/**`. The monorepo's shared jest template controls this and that session has been told, so don't edit `jest.config.js` here.
+- ~~Migrate to @wordpress/scripts 36 + Vitest~~ — ✅ DONE (2026-10-15). 44/44 JS tests under Vitest, matching the Jest baseline; CI on Node 24. jest-console's fail-on-unexpected-console is gone. See #55.
+- Coverage reports skip `assets/js/**`: `coverage.include` in the shared `vitest.config.mjs` only covers `src/**`. The monorepo template controls this, so don't edit it here.
 
 ## v1 (Classic Editor)
 
