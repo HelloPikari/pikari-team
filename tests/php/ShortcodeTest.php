@@ -23,6 +23,21 @@ class ShortcodeTest extends TestCase {
         if ( ! defined( 'PIKARI_TEAM_DIR' ) ) {
             define( 'PIKARI_TEAM_DIR', '/tmp/pikari-team/' );
         }
+
+        // Stubs the asset calls every rendered card makes. Cards render after
+        // wp_enqueue_scripts unless a test says otherwise.
+        Functions\when( 'did_action' )->justReturn( 1 );
+        Functions\when( 'wp_style_is' )->justReturn( false );
+        Functions\when( 'wp_register_style' )->justReturn( true );
+        Functions\when( 'wp_add_inline_style' )->justReturn( true );
+    }
+
+    /**
+     * Stub the enqueue calls for tests that don't assert on them.
+     */
+    private function stub_enqueues(): void {
+        Functions\when( 'wp_enqueue_style' )->justReturn( null );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
     }
 
     /**
@@ -54,7 +69,10 @@ class ShortcodeTest extends TestCase {
     /**
      * Stub what Card_Renderer::render() needs to build member data.
      */
-    private function mock_member_data(): void {
+    private function mock_member_data( bool $stub_enqueues = true ): void {
+        if ( $stub_enqueues ) {
+            $this->stub_enqueues();
+        }
         Functions\when( 'get_post_meta' )->alias(
             function ( $id, $key = '', $single = false ) {
                 return '' === $key ? [] : '';
@@ -75,6 +93,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_shortcode_resolves_slug_to_post_id(): void {
+        $this->stub_enqueues();
         $this->mock_post();
         Functions\when( 'add_shortcode' )->justReturn( null );
         Functions\when( 'get_post_meta' )->alias(
@@ -101,6 +120,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_shortcode_uses_id_attribute_directly(): void {
+        $this->stub_enqueues();
         $this->mock_post();
         Functions\when( 'add_shortcode' )->justReturn( null );
         Functions\when( 'get_post_meta' )->alias(
@@ -127,6 +147,7 @@ class ShortcodeTest extends TestCase {
     }
 
     public function test_render_card_fires_embed_hooks(): void {
+        $this->stub_enqueues();
         $this->mock_post();
         Functions\when( 'get_post_meta' )->alias(
             function ( $id, $key = '', $single = false ) {
@@ -310,5 +331,55 @@ class ShortcodeTest extends TestCase {
         Actions\expectDone( 'pikari_team_card_carousel' )->once();
 
         $this->assertStringContainsString( 'pikari-team-card', Shortcode::render_full_card( 42 ) );
+    }
+
+    // -------------------------------------------------------------------------
+    // Card assets: a card on any page loads card.css, the full view also
+    // loads the carousel script
+    // -------------------------------------------------------------------------
+
+    public function test_render_card_enqueues_the_card_styles_without_the_carousel(): void {
+        $this->mock_post();
+        $this->mock_member_data( false );
+
+        Functions\expect( 'wp_enqueue_style' )->once()->with( 'pikari-team-card' );
+        Functions\expect( 'wp_enqueue_script' )->never();
+
+        Shortcode::render_card( 42 );
+    }
+
+    public function test_render_full_card_enqueues_the_card_styles_and_the_carousel(): void {
+        $this->mock_post();
+        $this->mock_member_data( false );
+
+        Functions\expect( 'wp_enqueue_style' )->once()->with( 'pikari-team-card' );
+        Functions\expect( 'wp_enqueue_script' )
+            ->once()
+            ->with( 'pikari-team-carousel', \Mockery::type( 'string' ), [], PIKARI_TEAM_VERSION, [ 'in_footer' => true ] );
+
+        Shortcode::render_full_card( 42 );
+    }
+
+    public function test_a_card_that_renders_nothing_enqueues_nothing(): void {
+        $this->mock_post( 'pikari_team_member', 'publish', false, true );
+
+        Functions\expect( 'wp_enqueue_style' )->never();
+        Functions\expect( 'wp_enqueue_script' )->never();
+
+        Shortcode::render_card( 42 );
+        Shortcode::render_full_card( 42 );
+    }
+
+    public function test_a_card_rendered_before_wp_enqueue_scripts_waits_for_it(): void {
+        // Block themes render the template before wp_head. Enqueuing then would
+        // put card.css ahead of the theme's layout styles, which then win.
+        $this->mock_post();
+        $this->mock_member_data( false );
+        Functions\when( 'did_action' )->justReturn( 0 );
+
+        Functions\expect( 'wp_enqueue_style' )->never();
+        Actions\expectAdded( 'wp_enqueue_scripts' )->once();
+
+        Shortcode::render_card( 42 );
     }
 }

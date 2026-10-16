@@ -207,6 +207,8 @@ class TemplateTest extends TestCase {
     private function mock_single_page( array $settings = [ 'brand_color' => '#ff6600' ] ): void {
         Functions\when( 'is_singular' )->justReturn( true );
         Functions\when( 'get_queried_object_id' )->justReturn( 7 );
+        Functions\when( 'wp_style_is' )->justReturn( false );
+        Functions\when( 'did_action' )->justReturn( 1 );
         Functions\when( 'get_post_meta' )->justReturn( [] );
         Functions\when( 'get_the_post_thumbnail_url' )->justReturn( '' );
         Functions\when( 'get_option' )->justReturn( $settings );
@@ -432,5 +434,16 @@ class TemplateTest extends TestCase {
         $this->assertSame( '/index.php', ( new Template() )->route_template( '/index.php' ) );
         $this->assertSame( [], $wp_query->posts );
         $this->assertSame( 0, $wp_query->post_count );
+    }
+
+    public function test_enqueue_card_assets_adds_the_inline_css_only_once_per_page(): void {
+        $this->mock_single_page();
+        Functions\when( 'wp_style_is' )->justReturn( true );
+        Functions\when( 'wp_enqueue_script' )->justReturn( null );
+
+        Functions\expect( 'wp_register_style' )->never();
+        Functions\expect( 'wp_add_inline_style' )->never();
+
+        Template::enqueue_card_assets( 7, true );
     }
 }

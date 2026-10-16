@@ -146,39 +146,71 @@ class Template {
             return;
         }
 
-        $data         = Template_Tags::get_member_data( get_queried_object_id() );
-        $settings     = get_option( Settings::OPTION_KEY, [] );
-        $brand_color  = $settings['brand_color'] ?? '#0073aa';
-        $default_file = PIKARI_TEAM_DIR . 'assets/css/card.css';
+        self::enqueue_card_assets( get_queried_object_id(), true );
+    }
 
-        /** This filter is documented in templates/card-standalone.php */
-        $css_file = apply_filters( 'pikari_team_card_css_file', $default_file, $data );
-
-        $src = false;
-        $css = '';
-        if ( $default_file === $css_file ) {
-            $src = PIKARI_TEAM_URL . 'assets/css/card.css';
-        } elseif ( $css_file && file_exists( $css_file ) ) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file path from filter.
-            $css = file_get_contents( $css_file );
+    /**
+     * Enqueue the card styles, and optionally the carousel script.
+     *
+     * Called for the single page and for every card block or shortcode that
+     * renders, so a card on any page is styled. The inline CSS is added once
+     * per page, using the first card's member data for the filters.
+     *
+     * @param int  $post_id       Team member post ID.
+     * @param bool $with_carousel Whether the card has a carousel (full view).
+     */
+    public static function enqueue_card_assets( int $post_id, bool $with_carousel ): void {
+        // Block themes render the template before wp_head. Enqueuing then would
+        // print card.css ahead of the theme's global and layout styles, which
+        // would win on equal specificity, so wait for wp_enqueue_scripts.
+        // Classic themes render content after it; those styles print in the footer.
+        if ( ! did_action( 'wp_enqueue_scripts' ) ) {
+            add_action(
+                'wp_enqueue_scripts',
+                static function () use ( $post_id, $with_carousel ) {
+                    self::enqueue_card_assets( $post_id, $with_carousel );
+                }
+            );
+            return;
         }
 
-        $css .= ':root { --pikari-brand-color: ' . esc_attr( $brand_color ) . '; }';
+        if ( ! wp_style_is( 'pikari-team-card', 'enqueued' ) ) {
+            $data         = Template_Tags::get_member_data( $post_id );
+            $settings     = get_option( Settings::OPTION_KEY, [] );
+            $brand_color  = $settings['brand_color'] ?? '#0073aa';
+            $default_file = PIKARI_TEAM_DIR . 'assets/css/card.css';
 
-        /** This filter is documented in templates/card-standalone.php */
-        $css .= apply_filters( 'pikari_team_card_css', '', $data );
+            /** This filter is documented in templates/card-standalone.php */
+            $css_file = apply_filters( 'pikari_team_card_css_file', $default_file, $data );
 
-        wp_register_style( 'pikari-team-card', $src, [], PIKARI_TEAM_VERSION );
-        wp_add_inline_style( 'pikari-team-card', $css );
-        wp_enqueue_style( 'pikari-team-card' );
+            $src = false;
+            $css = '';
+            if ( $default_file === $css_file ) {
+                $src = PIKARI_TEAM_URL . 'assets/css/card.css';
+            } elseif ( $css_file && file_exists( $css_file ) ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file path from filter.
+                $css = file_get_contents( $css_file );
+            }
 
-        wp_enqueue_script(
-            'pikari-team-carousel',
-            PIKARI_TEAM_URL . 'assets/js/carousel.js',
-            [],
-            PIKARI_TEAM_VERSION,
-            [ 'in_footer' => true ]
-        );
+            $css .= ':root { --pikari-brand-color: ' . esc_attr( $brand_color ) . '; }';
+
+            /** This filter is documented in templates/card-standalone.php */
+            $css .= apply_filters( 'pikari_team_card_css', '', $data );
+
+            wp_register_style( 'pikari-team-card', $src, [], PIKARI_TEAM_VERSION );
+            wp_add_inline_style( 'pikari-team-card', $css );
+            wp_enqueue_style( 'pikari-team-card' );
+        }
+
+        if ( $with_carousel ) {
+            wp_enqueue_script(
+                'pikari-team-carousel',
+                PIKARI_TEAM_URL . 'assets/js/carousel.js',
+                [],
+                PIKARI_TEAM_VERSION,
+                [ 'in_footer' => true ]
+            );
+        }
     }
 
     public function route_template( string $template ): string {
