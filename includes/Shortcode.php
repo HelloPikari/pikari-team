@@ -98,6 +98,8 @@ class Shortcode {
             return '';
         }
 
+        Template::enqueue_card_assets( $post_id, false );
+
         return Card_Renderer::render( $post_id, 'shortcode' );
     }
 
@@ -111,6 +113,8 @@ class Shortcode {
         if ( ! self::can_render( $post_id ) ) {
             return '';
         }
+
+        Template::enqueue_card_assets( $post_id, true );
 
         return Card_Renderer::render( $post_id, 'single' );
     }
