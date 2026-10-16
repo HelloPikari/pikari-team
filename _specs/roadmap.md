@@ -10,6 +10,8 @@ Started 2026-09-16. Anything earlier is in `_log/2026-04-07.md` and the git hist
 - ~~1.0.4 published and installed on OSC~~ — ✅ DONE (2026-10-07). Contains #42–#44, #48 and #49.
 - ~~1.0.5 published~~ — ✅ DONE (2026-10-07). Two security fixes, #50 and #52 (see Security). OSC update pending (todo #688).
 - ~~1.0.6 published~~ — ✅ DONE (2026-10-16). Tooling only: the scripts-36/Vitest migration (#55) plus a php-stubs bump (#54). Bump PR #56 merged itself; the package index lists 1.0.6. No runtime change, so OSC doesn't need it.
+- ~~1.0.7 published~~ — ✅ DONE (2026-10-16). Cards are styled on every page, and the `/card/` contact links are styled again (see v1). Package index lists 1.0.7. Spot-check an OSC page with an embedded card after updating. See #58.
+- 1.0.8 draft unpublished. It contains only #60 (the `Update URI` header), merged by the monorepo session. Steve decides when to publish.
 - The release-drafter notes list a PR once per label, and #55 appeared 3 times (docs, chore, dependencies; the autolabeler adds labels from the files a PR touches). The install snippet also shows a bare `composer require`, which can't work without the package-index repository entry. Both come from the shared template; cosmetic, so not raised with the monorepo yet.
 
 ## Security
@@ -26,12 +28,15 @@ Started 2026-09-16. Anything earlier is in `_log/2026-04-07.md` and the git hist
 - ~~JS unit tests for the v1 card-page scripts~~ — ✅ DONE (2026-09-16). `carousel.js` and `sw-register.js`, 11 tests; all 18 deliberate breaks caught. See #39.
 - ~~JS unit tests for the block editor files~~ — ✅ DONE (2026-09-16). `sidebar-panel.js` and `blocks/card/edit.js`, 32 tests; 20 of 21 breaks caught, and the one miss can't be observed by any test. JS suite now 43. See #40.
 - ~~Migrate to @wordpress/scripts 36 + Vitest~~ — ✅ DONE (2026-10-15). 44/44 JS tests under Vitest, matching the Jest baseline; CI on Node 24. jest-console's fail-on-unexpected-console is gone. See #55.
+- ~~Playwright e2e + visual suite~~ — ✅ DONE (2026-10-16). 39 pass, 1 fixme (carousel arrow keys); 8 visual baselines, macOS-only and run locally only (CI doesn't run e2e). Mutation checks: 6 of 6 caught. See #57.
 - Coverage reports skip `assets/js/**`: `coverage.include` in the shared `vitest.config.mjs` only covers `src/**`. The monorepo template controls this, so don't edit it here.
 
 ## v1 (Classic Editor)
 
 - Add a card template selector to the Classic Editor meta box. `pikari_team_card_template` can only be edited in the block editor sidebar; `Meta_Box.php` has no field for it.
-- Work through display issues on the standalone card page and shortcode embed. Carried over from 2026-04-07 and not re-checked. The single page is done (below); the shortcode embed still loads no CSS.
+- ~~Style cards outside the single page~~ — ✅ DONE (2026-10-16). Contact links on `/card/`, the embed and the shortcode had been unstyled for six months: the Card_Renderer refactor renamed the class to `__contact-link` and card.css was never updated. card.css and carousel.js now load wherever a card block or shortcode renders, with the `<head>` order unchanged in block themes. See #58.
+- A full-view card on an ordinary page prints the member name as an `<h1>`, so the page has two. Two cards placed back to back have no gap between them.
+- In classic themes, a card on an ordinary page enqueues after `wp_enqueue_scripts`, so the documented `wp_dequeue_style` opt-out doesn't reach it. Returning `false` from `pikari_team_card_css_file` works everywhere and is documented.
 - ~~Style the single team member page inside the theme~~ — ✅ DONE (2026-10-06). The single page loads card.css and carousel.js. card.css's global `*` reset is scoped to the card, and `/card/` screenshots are byte-identical. See #48.
 - ~~Single page layout and block theme support~~ — ✅ DONE (2026-10-07). Classic themes get an `article`/`.entry-content` container. Block themes get a registered block template instead of the forced PHP template, so 0 deprecation notices. The card name is the page h1, and the card is hidden on password-protected members. See #49.
 - Members created in the block editor get the CPT editor `template` (featured image, bound name heading, bound job title), which now duplicates the card header on the single page. Slim the template to a bio paragraph. OSC isn't affected. The decision todo #687 was cancelled on 2026-10-07 because this roadmap item tracks it.
