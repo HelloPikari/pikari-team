@@ -28,6 +28,7 @@ class ShortcodeTest extends TestCase {
         // wp_enqueue_scripts unless a test says otherwise.
         Functions\when( 'did_action' )->justReturn( 1 );
         Functions\when( 'wp_style_is' )->justReturn( false );
+        Functions\when( 'wp_script_is' )->justReturn( false );
         Functions\when( 'wp_register_style' )->justReturn( true );
         Functions\when( 'wp_add_inline_style' )->justReturn( true );
     }

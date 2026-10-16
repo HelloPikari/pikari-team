@@ -139,7 +139,9 @@ class Template {
      * Uses the same CSS filters as the standalone card so overrides apply in
      * both views. Themes can wp_dequeue_style( 'pikari-team-card' ) or
      * wp_dequeue_script( 'pikari-team-carousel' ) on wp_enqueue_scripts at a
-     * priority above 10 to opt out.
+     * priority above 10 to opt out. In classic themes a card on any other page
+     * enqueues after that hook, so return false from pikari_team_card_css_file
+     * to drop the stylesheet everywhere.
      */
     public function enqueue_single_assets(): void {
         if ( ! is_singular( Post_Type::CPT_SLUG ) ) {
@@ -153,8 +155,8 @@ class Template {
      * Enqueue the card styles, and optionally the carousel script.
      *
      * Called for the single page and for every card block or shortcode that
-     * renders, so a card on any page is styled. The inline CSS is added once
-     * per page, using the first card's member data for the filters.
+     * renders, so a card on any page is styled. Each asset is set up once per
+     * page, using the first card's member data for the CSS filters.
      *
      * @param int  $post_id       Team member post ID.
      * @param bool $with_carousel Whether the card has a carousel (full view).
@@ -174,7 +176,9 @@ class Template {
             return;
         }
 
-        if ( ! wp_style_is( 'pikari-team-card', 'enqueued' ) ) {
+        // Checking 'registered', not 'enqueued', means a second card skips this,
+        // and so does a card after a theme has dequeued the handle to opt out.
+        if ( ! wp_style_is( 'pikari-team-card', 'registered' ) ) {
             $data         = Template_Tags::get_member_data( $post_id );
             $settings     = get_option( Settings::OPTION_KEY, [] );
             $brand_color  = $settings['brand_color'] ?? '#0073aa';
@@ -202,7 +206,7 @@ class Template {
             wp_enqueue_style( 'pikari-team-card' );
         }
 
-        if ( $with_carousel ) {
+        if ( $with_carousel && ! wp_script_is( 'pikari-team-carousel', 'registered' ) ) {
             wp_enqueue_script(
                 'pikari-team-carousel',
                 PIKARI_TEAM_URL . 'assets/js/carousel.js',
