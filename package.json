@@ -39,7 +39,7 @@
 		"@wordpress/e2e-test-utils-playwright": "^3.2.0",
 		"@wordpress/env": "latest",
 		"@wordpress/scripts": "^36.1.0",
-		"globals": "^17.13.0",
+		"globals": "^17.14.0",
 		"husky": "latest",
 		"jsdom": "^26.1.0",
 		"lint-staged": "latest",
